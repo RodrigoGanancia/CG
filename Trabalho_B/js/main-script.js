@@ -8,7 +8,7 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 /* GLOBAL VARIABLES */
 //////////////////////
 var camera, scene, renderer;
-var geometry, material, mesh;
+var geometry, material, material2, mesh;
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -34,9 +34,9 @@ function createCamera() {
                                          window.innerWidth / window.innerHeight,
                                          1,
                                          1000);
-    camera.position.x = 70;
-    camera.position.y = 70;
-    camera.position.z = 70;
+    camera.position.x = 40;
+    camera.position.y = 80;
+    camera.position.z = 40;
     camera.lookAt(scene.position);
 }
 
@@ -69,16 +69,49 @@ function addTower(obj, x, y, z) {
 function addCraneHolder(obj, x, y, z) {
     'use strict'
 
-    geometry = new THREE.CylinderGeometry(0, 1.768, 6, 4, 1);
-    material = new THREE.MeshNormalMaterial();
+    geometry = new THREE.CylinderGeometry(0, 1.2, 4, 4, 1);
+    //material = new THREE.MeshNormalMaterial();
     mesh = new THREE.Mesh(geometry, material);
     mesh.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
-    mesh.position.set(x, y + 3, z);
+    mesh.position.set(x, y + 2, z);
     obj.add(mesh);
 }
 
-function addUpperCrane(obj, x, y, z) {
-    
+function addCraneHolderTower(obj, x, y, z) {
+    'use strict'
+
+    geometry = new THREE.BoxGeometry(1.697, 2.5, 1.697);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y + 1.25, z);
+    obj.add(mesh);
+}
+
+function addRotatingCylinder(obj, x, y ,z) {
+    'use strict'
+
+    geometry = new THREE.CylinderGeometry(1.2, 1.25, 0.5, 32);
+    // material = new THREE.MeshNormalMaterial();
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y + 0.25, z);
+    obj.add(mesh);
+}
+
+function addUpperCraneBoom(obj, x, y, z) {
+    'use strict'
+
+    geometry = new THREE.BoxGeometry(15, 2.5, 1.697);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x - 7.5, y + 1.25, z);
+    obj.add(mesh);
+}
+
+function addUpperCraneBoomBack(obj, x, y, z) {
+    'use strict'
+
+    geometry = new THREE.BoxGeometry(8, 2.5, 1.697);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x + 4, y + 1.25, z);
+    obj.add(mesh);
 }
 
 function createCrane(x, y, z) {
@@ -87,10 +120,16 @@ function createCrane(x, y, z) {
     var crane = new THREE.Object3D();
 
     material = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true });
+    material2 = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
 
     addBase(crane, 0, 0, 0);
     addTower(crane, 0, 3, 0);
-    addCraneHolder(crane, 0, 48, 0);
+    addCraneHolder(crane, 0, 51, 0);
+    addRotatingCylinder(crane, 0, 48, 0);
+    addCraneHolderTower(crane, 0, 48.5, 0);
+    addUpperCraneBoom(crane, 0, 48.5, 0)
+    addUpperCraneBoomBack(crane, 0, 48.5, 0)
+
 
     scene.add(crane);
 
@@ -98,6 +137,8 @@ function createCrane(x, y, z) {
     crane.position.y = y;
     crane.position.z = z;
 }
+
+
 
 
 
