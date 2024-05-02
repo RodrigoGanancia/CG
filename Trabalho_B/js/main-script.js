@@ -9,6 +9,7 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 //////////////////////
 var camera, scene, renderer;
 var geometry, material, material2, mesh;
+var cart;
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -48,21 +49,12 @@ function createCamera() {
 /* CREATE OBJECT3D(S) */
 ////////////////////////
 
-function addFrontBoom(obj, x, y, z) {
+function addBoom(obj, x, y, z) {
     'use strict'
 
-    geometry = new THREE.BoxGeometry(45, 2.5, 2.5);
+    geometry = new THREE.BoxGeometry(57.5, 2.5, 2.5);
     mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x + 22.5, y, z);
-    obj.add(mesh);
-}
-
-function addBackBoom(obj, x, y, z) {
-    'use strict'
-
-    geometry = new THREE.BoxGeometry(10, 2.5, 2.5);
-    mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x - 5, y, z);
+    mesh.position.set(x + 16.5, y, z);
     obj.add(mesh);
 }
 
@@ -73,15 +65,6 @@ function addCounterWeight(obj, x, y, z) {
     mesh = new THREE.Mesh(geometry, material);
     mesh.position.set(x , y - 1, z);
     obj.add(mesh);
-}
-
-function addUpperCrane(obj, x, y, z) {
-    'use strict'
-
-    addFrontBoom(obj, x + 1.25, y + 1.5, z);
-    addBackBoom(obj, x - 1.25, y + 1.5, z);
-    addCounterWeight(obj, x - 6.75, y, z);
-    addCraneHolder(obj, x, y, z);
 }
 
 function addBase(obj, x, y, z) {
@@ -108,8 +91,63 @@ function addCraneHolder(obj, x, y, z) {
     geometry = new THREE.CylinderGeometry(0, 1.768, 6, 4, 1);
     mesh = new THREE.Mesh(geometry, material);
     mesh.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
-    mesh.position.set(x, y + 2, z);
+    mesh.position.set(x, y + 3, z);
     obj.add(mesh);
+}
+
+function addCabin(obj, x, y, z) {
+    'use strict';
+
+    geometry = new THREE.BoxGeometry(3, 3, 3);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y, z + 1.5);
+    obj.add(mesh);
+}
+
+function createHook(obj, x, y, z) {
+    'use strict';
+
+    var hook = new THREE.Object3D();
+    obj.add(hook);
+}
+
+function addCart(obj, x, y, z) {
+    geometry = new THREE.BoxGeometry(2.5, 1, 2.5);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y - 0.5, z);
+    obj.add(mesh);
+}
+
+function addCable(obj, x, y, z) {
+    geometry = new THREE.CylinderGeometry(0.3, 0.3, 20);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y - 10, z);
+    obj.add(mesh);
+}
+
+function createCart(obj, x, y, z) {
+    'use strict';
+
+    cart = new THREE.Object3D();
+    cart.userData = { step: 0.0 };
+    addCart(cart, x + 22.5, y, z);
+    addCable(cart, x + 22.5, y - 1, z);
+    createHook(cart)
+    obj.add(cart);
+}
+
+function createUpperCrane(obj, x, y, z) {
+    'use strict';
+
+    var upperCrane = new THREE.Object3D();
+    addBoom(upperCrane, x + 1.25, y + 1.5, z);
+    addCounterWeight(upperCrane, x - 6.75, y, z);
+    addCraneHolder(upperCrane, x, y + 2.5, z);
+    addCabin(upperCrane, x, y - 1.5, z + 1.25);
+
+    createCart(upperCrane, x, y, z);
+
+    obj.add(upperCrane);
 }
 
 function createCrane(x, y, z) {
@@ -122,7 +160,7 @@ function createCrane(x, y, z) {
 
     addBase(crane, 0, 0, 0);
     addTower(crane, 0, 3, 0);
-    addUpperCrane(crane, 0, 48, 0);
+    createUpperCrane(crane, 0, 48, 0);
 
     scene.add(crane);
 
@@ -131,7 +169,12 @@ function createCrane(x, y, z) {
     crane.position.z = z;
 }
 
+function createCable(x, y, z) {
+    'use strict';
 
+    var cable = new THREE.Object3D();
+
+}
 
 
 
@@ -193,6 +236,9 @@ function init() {
 function animate() {
     'use strict';
 
+    if (cart.userData.step > 0) {
+
+    }
 }
 
 ////////////////////////////
@@ -208,7 +254,13 @@ function onResize() {
 ///////////////////////
 function onKeyDown(e) {
     'use strict';
-
+    
+    switch(e.keyCode) {
+        case 83:
+        case 115:       
+            cart.userData.step += 0.1;
+            break;
+    }
 }
 
 ///////////////////////
