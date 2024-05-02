@@ -10,7 +10,7 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 var camera, scene, renderer;
 var geometry, material, material2, mesh;
 var cart;
-var current_camera = "Orthogonal Camera";
+var current_camera = "Perspective Camera";
 var cameras = {};
 
 /////////////////////
@@ -53,7 +53,7 @@ function createFrontalCamera() {
 function createSideCamera() {
     'use strict';
 
-    createCamera(0, 20, 100);
+    createCamera(0, 40, 100);
 
     cameras["Side Camera"] = camera;
 }
@@ -68,14 +68,32 @@ function createTopCamera() {
 
 function createOrthogonalCamera() {
     'use strict';
-    createCamera(0, 70, 70);
+
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    var aspectRatio = width / height;
+    var cameraWidth = 250; // Width of the visible scene
+    var cameraHeight = cameraWidth / aspectRatio; // Calculate height based on aspect ratio
+
+    camera = new THREE.OrthographicCamera(
+    cameraWidth / -2, // Left
+    cameraWidth / 2,  // Right
+    cameraHeight / 2, // Top
+    cameraHeight / -2, // Bottom
+    1, // Near
+    1000 // Far
+);
+    camera.position.x = 20;
+    camera.position.z = 70;
+    camera.position.z = 70;
+    camera.lookAt(scene.position);
 
     cameras["Orthogonal Camera"] = camera;
 }
 
 function createPerspectiveCamera() {
     'use strict';
-    createCamera(0, 100, 70);
+    createCamera(20, 70, 70);
 
     cameras["Perspective Camera"] = camera;
 }
@@ -184,7 +202,7 @@ function createCart(obj, x, y, z) {
     'use strict';
 
     cart = new THREE.Object3D();
-    cart.userData = { step: 0.0 };
+    cart.userData = { step: 0.7, moving: false };
     addCart(cart, x + 22.5, y, z);
     addCable(cart, x + 22.5, y - 1, z);
     createHook(cart)
@@ -285,6 +303,7 @@ function init() {
     render();
 
     window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
 }
 
 /////////////////////
@@ -293,6 +312,9 @@ function init() {
 function animate() {
     'use strict';
 
+    if (cart.userData.moving) {
+        cart.position.x += cart.userData.step * 0.1;
+    }
     render();
 
     requestAnimationFrame(animate);
@@ -339,7 +361,21 @@ function onKeyDown(e) {
             break;
         case 83:
         case 115:       
-            cart.userData.step += 0.1;
+            if (!cart.userData.moving) {
+                if (cart.userData.step > 0) {
+                    cart.userData.step = -cart.userData.step;
+                }
+                cart.userData.moving = !cart.userData.moving;
+            }
+            break;
+        case 87:
+        case 119:
+            if (!cart.userData.moving) {
+                if (cart.userData.step < 0) {
+                    cart.userData.step = -cart.userData.step;
+                }
+                cart.userData.moving = !cart.userData.moving;
+            }
             break;
     }
 }
@@ -349,6 +385,16 @@ function onKeyDown(e) {
 ///////////////////////
 function onKeyUp(e){
     'use strict';
+    switch (e.keyCode) {
+        case 83:
+        case 115:       
+            cart.userData.moving = false
+            break;
+        case 87:
+        case 119:
+            cart.userData.moving = false;
+            break;
+    }
 }
 
 init();
