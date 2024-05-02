@@ -31,86 +31,59 @@ function createScene(){
 /* CREATE CAMERA(S) */
 //////////////////////
 
-function createFrontalCamera() {
-    'use strict';
+function createCamera(x, y, z) {
     camera = new THREE.PerspectiveCamera(70,
                                          window.innerWidth / window.innerHeight,
                                          1,
                                          1000);
-    camera.position.x = 100;
-    camera.position.y = 50;
-    camera.position.z = 0;
+    camera.position.x = x;
+    camera.position.y = y;
+    camera.position.z = z;
     camera.lookAt(scene.position);
+}
+
+function createFrontalCamera() {
+    'use strict';
+
+    createCamera(100, 50, 0);
 
     cameras["Frontal Camera"] = camera;
 }
 
 function createSideCamera() {
     'use strict';
-    camera = new THREE.PerspectiveCamera(70,
-                                         window.innerWidth / window.innerHeight,
-                                         1,
-                                         1000);
-    camera.position.x = 0;
-    camera.position.y = 20;
-    camera.position.z = 100;
-    camera.lookAt(scene.position);
+
+    createCamera(0, 20, 100);
 
     cameras["Side Camera"] = camera;
 }
 
 function createTopCamera() {
     'use strict';
-    camera = new THREE.PerspectiveCamera(70,
-                                         window.innerWidth / window.innerHeight,
-                                         1,
-                                         1000);
-    camera.position.x = 0;
-    camera.position.y = 100;
-    camera.position.z = 0;
-    camera.lookAt(scene.position);
+
+    createCamera(0, 100, 0);
 
     cameras["Top Camera"] = camera;
 }
 
 function createOrthogonalCamera() {
     'use strict';
-    camera = new THREE.PerspectiveCamera(70,
-                                         window.innerWidth / window.innerHeight,
-                                         1,
-                                         1000);
-    camera.position.x = 0;
-    camera.position.y = 70;
-    camera.position.z = 70;
-    camera.lookAt(scene.position);
+    createCamera(0, 70, 70);
 
     cameras["Orthogonal Camera"] = camera;
 }
 
 function createPerspectiveCamera() {
     'use strict';
-    camera = new THREE.PerspectiveCamera(70,
-                                         window.innerWidth / window.innerHeight,
-                                         1,
-                                         1000);
-    camera.position.x = 0;
-    camera.position.y = 100;
-    camera.position.z = 70;
-    camera.lookAt(scene.position);
+    createCamera(0, 100, 70);
 
     cameras["Perspective Camera"] = camera;
 }
 
 function createHookCamera() {
     'use strict';
-    camera = new THREE.PerspectiveCamera(70,
-                                         window.innerWidth / window.innerHeight,
-                                         1,
-                                         1000);
-    camera.position.x = 100;
-    camera.position.y = 100;
-    camera.position.z = 100;
-    camera.lookAt(scene.position);
+    createCamera(100, 100, 100);
+
     cameras["Hook Camera"] = camera;
 }
 
