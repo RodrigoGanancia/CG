@@ -10,6 +10,8 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 var camera, scene, renderer;
 var geometry, material, material2, mesh;
 var cart;
+var current_camera = "Orthogonal Camera";
+var cameras = {};
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -29,7 +31,49 @@ function createScene(){
 /* CREATE CAMERA(S) */
 //////////////////////
 
-function createCamera() {
+function createFrontalCamera() {
+    'use strict';
+    camera = new THREE.PerspectiveCamera(70,
+                                         window.innerWidth / window.innerHeight,
+                                         1,
+                                         1000);
+    camera.position.x = 100;
+    camera.position.y = 50;
+    camera.position.z = 0;
+    camera.lookAt(scene.position);
+
+    cameras["Frontal Camera"] = camera;
+}
+
+function createSideCamera() {
+    'use strict';
+    camera = new THREE.PerspectiveCamera(70,
+                                         window.innerWidth / window.innerHeight,
+                                         1,
+                                         1000);
+    camera.position.x = 0;
+    camera.position.y = 20;
+    camera.position.z = 100;
+    camera.lookAt(scene.position);
+
+    cameras["Side Camera"] = camera;
+}
+
+function createTopCamera() {
+    'use strict';
+    camera = new THREE.PerspectiveCamera(70,
+                                         window.innerWidth / window.innerHeight,
+                                         1,
+                                         1000);
+    camera.position.x = 0;
+    camera.position.y = 100;
+    camera.position.z = 0;
+    camera.lookAt(scene.position);
+
+    cameras["Top Camera"] = camera;
+}
+
+function createOrthogonalCamera() {
     'use strict';
     camera = new THREE.PerspectiveCamera(70,
                                          window.innerWidth / window.innerHeight,
@@ -39,6 +83,44 @@ function createCamera() {
     camera.position.y = 70;
     camera.position.z = 70;
     camera.lookAt(scene.position);
+
+    cameras["Orthogonal Camera"] = camera;
+}
+
+function createPerspectiveCamera() {
+    'use strict';
+    camera = new THREE.PerspectiveCamera(70,
+                                         window.innerWidth / window.innerHeight,
+                                         1,
+                                         1000);
+    camera.position.x = 0;
+    camera.position.y = 100;
+    camera.position.z = 70;
+    camera.lookAt(scene.position);
+
+    cameras["Perspective Camera"] = camera;
+}
+
+function createHookCamera() {
+    'use strict';
+    camera = new THREE.PerspectiveCamera(70,
+                                         window.innerWidth / window.innerHeight,
+                                         1,
+                                         1000);
+    camera.position.x = 100;
+    camera.position.y = 100;
+    camera.position.z = 100;
+    camera.lookAt(scene.position);
+    cameras["Hook Camera"] = camera;
+}
+
+function createCameras() {
+    createFrontalCamera();
+    createSideCamera();
+    createTopCamera();
+    createOrthogonalCamera();
+    createPerspectiveCamera();
+    createHookCamera();
 }
 
 /////////////////////
@@ -209,7 +291,7 @@ function update(){
 function render() {
     'use strict';
 
-    renderer.render(scene, camera);
+    renderer.render(scene, cameras[current_camera]);
 }
 
 ////////////////////////////////
@@ -225,9 +307,11 @@ function init() {
     document.body.appendChild(renderer.domElement);
 
     createScene();
-    createCamera();
+    createCameras();
 
     render();
+
+    window.addEventListener("keydown", onKeyDown);
 }
 
 /////////////////////
@@ -236,9 +320,9 @@ function init() {
 function animate() {
     'use strict';
 
-    if (cart.userData.step > 0) {
+    render();
 
-    }
+    requestAnimationFrame(animate);
 }
 
 ////////////////////////////
@@ -256,6 +340,30 @@ function onKeyDown(e) {
     'use strict';
     
     switch(e.keyCode) {
+        // Switch to frontal camera
+        case 49:
+            current_camera = "Frontal Camera";
+            break;
+        // Switch to side camera
+        case 50:
+            current_camera = "Side Camera";
+            break;
+        // Switch to top camera
+        case 51:
+            current_camera = "Top Camera";
+            break;
+        // Switch to orthogonal camera
+        case 52:
+            current_camera = "Orthogonal Camera";
+            break;
+        // Switch to perspective camera
+        case 53:
+            current_camera = "Perspective Camera";
+            break;
+        // Switch to perspective camera
+        case 54:
+            current_camera = "Hook Camera";
+            break;
         case 83:
         case 115:       
             cart.userData.step += 0.1;
