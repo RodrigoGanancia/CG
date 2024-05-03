@@ -203,12 +203,13 @@ function createCable(obj, x, y, z) {
     'use strict';
 
     cable = new THREE.Object3D();
-    cable.userData = { length: 20, step: 0.7, moving: false };
+    cable.userData = { length: 20, step: 0.03, moving: false };
     cable.position.set(x, y, z);
 
     cable.add(new THREE.AxesHelper(10));
 
-    addCable(cart, 0, -1, 0);
+    addCable(cable, 0, 0, 0);
+
     obj.add(cable)
 }
 
@@ -235,7 +236,6 @@ function createUpperCrane(obj, x, y, z) {
     upperCrane = new THREE.Object3D();
     upperCrane.position.set(x, y, z);
     upperCrane.add(new THREE.AxesHelper(10));
-    console.log("Upper crane: ", upperCrane.position)
 
     addBoom(upperCrane, 1.25, 0, 0);
     addCounterWeight(upperCrane, -6.75, -1.5, 0);
@@ -325,8 +325,31 @@ function init() {
 /////////////////////
 function animate() {
     'use strict';
+
     if (cart.userData.moving) {
-        cart.position.x += cart.userData.step * 0.1;
+        if (cart.position.x >= 3.5 ) {
+            cart.position.x += cart.userData.step * 0.1;
+        } else {
+            cart.position.x = 3.5;
+        }
+        if (cart.position.x <= 45.25) {
+            cart.position.x += cart.userData.step * 0.1;
+        } else {
+
+            cart.position.x = 45.25;
+        }
+    }
+    if (cable.userData.moving) {
+        if (cable.scale.y >= 0) {
+            cable.scale.y += cable.userData.step * 0.1;
+        } else {
+            cable.scale.y = 0;
+        }
+        if (cable.scale.y <= 2.2) {
+            cable.scale.y += cable.userData.step * 0.1;
+        } else {
+            cable.scale.y = 2.2;
+        }
     }
     render();
 
@@ -372,29 +395,37 @@ function onKeyDown(e) {
         case 54:
             current_camera = "Hook Camera";
             break;
+        // 'a' and 'A'
+        case 65:
+        case 97:
+            if (cable.userData.step > 0) {
+                cable.userData.step = -cable.userData.step;
+            }
+            cable.userData.moving = true;
+            break;
+        // 'q' and 'Q'
+        case 81:
+        case 113:
+            if (cable.userData.step < 0) {
+                cable.userData.step = -cable.userData.step;
+            }
+            cable.userData.moving = true;
+            break;
         // 's' and 'S'
         case 83:
         case 115:       
-            if (cart.position.x > 3.5) {
-                if (cart.userData.step > 0) {
-                    cart.userData.step = -cart.userData.step;
-                }
-                cart.userData.moving = true;
-            } else {
-                cart.userData.moving = false;
+            if (cart.userData.step > 0) {
+                cart.userData.step = -cart.userData.step;
             }
+            cart.userData.moving = true;
             break;
         // 'w' and 'W'
         case 87:
         case 119:
-            if (cart.position.x < 45.25) {
-                if (cart.userData.step < 0) {
-                    cart.userData.step = -cart.userData.step;
-                }
-                cart.userData.moving = true;
-            } else {
-                cart.userData.moving = false;
+            if (cart.userData.step < 0) {
+                cart.userData.step = -cart.userData.step;
             }
+            cart.userData.moving = true;
             break;
     }
 }
@@ -405,10 +436,22 @@ function onKeyDown(e) {
 function onKeyUp(e){
     'use strict';
     switch (e.keyCode) {
+        // 'a' and 'A'
+        case 65:
+        case 97:
+            cable.userData.moving = false;
+            break;
+        // 'q' and 'Q'
+        case 81:
+        case 113:
+            cable.userData.moving = false;
+            break;
+        // 's' and 'S'
         case 83:
         case 115:       
             cart.userData.moving = false
             break;
+        // 'w' and 'W'
         case 87:
         case 119:
             cart.userData.moving = false;
