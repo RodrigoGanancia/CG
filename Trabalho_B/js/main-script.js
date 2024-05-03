@@ -9,7 +9,7 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 //////////////////////
 var camera, scene, renderer;
 var geometry, material, material2, mesh;
-var cart, upperCrane;
+var cart, upperCrane, cable;
 var current_camera = "Side Camera";
 var cameras = {};
 
@@ -21,6 +21,7 @@ function createScene(){
     'use strict';
 
     scene = new THREE.Scene();
+    // scene.background = new THREE.Color(0x7195a3);
 
     scene.add(new THREE.AxesHelper(10));
 
@@ -198,18 +199,31 @@ function addCable(obj, x, y, z) {
     obj.add(mesh);
 }
 
+function createCable(obj, x, y, z) {
+    'use strict';
+
+    cable = new THREE.Object3D();
+    cable.userData = { length: 20, step: 0.7, moving: false };
+    cable.position.set(x, y, z);
+
+    cable.add(new THREE.AxesHelper(10));
+
+    addCable(cart, 0, -1, 0);
+    obj.add(cable)
+}
+
 function createCart(obj, x, y, z) {
     'use strict';
 
     cart = new THREE.Object3D();
     cart.position.set(x, y, z);
     cart.add(new THREE.AxesHelper(10));
-    console.log("Cart: ", cart.position)
 
     cart.userData = { step: 0.7, moving: false };
 
     addCart(cart, 0, 0, 0);
-    addCable(cart, 0, -1, 0);
+
+    createCable(cart, 0, -1, 0);
 
     createHook(cart)
     obj.add(cart);
@@ -250,13 +264,6 @@ function createCrane(x, y, z) {
     scene.add(crane);
 
 }
-
-// function createCable(x, y, z) {
-//     'use strict';
-//
-//     var cable = new THREE.Object3D();
-//
-// }
 
 //////////////////////
 /* CHECK COLLISIONS */
