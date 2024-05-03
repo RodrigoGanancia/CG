@@ -9,8 +9,8 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 //////////////////////
 var camera, scene, renderer;
 var geometry, material, material2, mesh;
-var cart;
-var current_camera = "Perspective Camera";
+var cart, upperCrane;
+var current_camera = "Side Camera";
 var cameras = {};
 
 /////////////////////
@@ -202,9 +202,15 @@ function createCart(obj, x, y, z) {
     'use strict';
 
     cart = new THREE.Object3D();
+    cart.position.set(x, y, z);
+    cart.add(new THREE.AxesHelper(10));
+    console.log("Cart: ", cart.position)
+
     cart.userData = { step: 0.7, moving: false };
-    addCart(cart, x + 22.5, y, z);
-    addCable(cart, x + 22.5, y - 1, z);
+
+    addCart(cart, 0, 0, 0);
+    addCable(cart, 0, -1, 0);
+
     createHook(cart)
     obj.add(cart);
 }
@@ -212,13 +218,17 @@ function createCart(obj, x, y, z) {
 function createUpperCrane(obj, x, y, z) {
     'use strict';
 
-    var upperCrane = new THREE.Object3D();
-    addBoom(upperCrane, x + 1.25, y + 1.5, z);
-    addCounterWeight(upperCrane, x - 6.75, y, z);
-    addCraneHolder(upperCrane, x, y + 2.5, z);
-    addCabin(upperCrane, x, y - 1.5, z + 1.25);
+    upperCrane = new THREE.Object3D();
+    upperCrane.position.set(x, y, z);
+    upperCrane.add(new THREE.AxesHelper(10));
+    console.log("Upper crane: ", upperCrane.position)
 
-    createCart(upperCrane, x, y, z);
+    addBoom(upperCrane, 1.25, 0, 0);
+    addCounterWeight(upperCrane, -6.75, -1.5, 0);
+    addCraneHolder(upperCrane, 0, 1, 0);
+    addCabin(upperCrane, 0, -3, 1.25);
+
+    createCart(upperCrane, 22.5, -1, 0);
 
     obj.add(upperCrane);
 }
@@ -233,23 +243,20 @@ function createCrane(x, y, z) {
 
     addBase(crane, 0, 0, 0);
     addTower(crane, 0, 3, 0);
-    createUpperCrane(crane, 0, 48, 0);
+    createUpperCrane(crane, 0, 49.5, 0);
+
+    crane.position.set(x, y, z);
 
     scene.add(crane);
 
-    crane.position.x = x;
-    crane.position.y = y;
-    crane.position.z = z;
 }
 
-function createCable(x, y, z) {
-    'use strict';
-
-    var cable = new THREE.Object3D();
-
-}
-
-
+// function createCable(x, y, z) {
+//     'use strict';
+//
+//     var cable = new THREE.Object3D();
+//
+// }
 
 //////////////////////
 /* CHECK COLLISIONS */
@@ -311,7 +318,6 @@ function init() {
 /////////////////////
 function animate() {
     'use strict';
-
     if (cart.userData.moving) {
         cart.position.x += cart.userData.step * 0.1;
     }
@@ -359,22 +365,28 @@ function onKeyDown(e) {
         case 54:
             current_camera = "Hook Camera";
             break;
+        // 's' and 'S'
         case 83:
         case 115:       
-            if (!cart.userData.moving) {
+            if (cart.position.x > 3.5) {
                 if (cart.userData.step > 0) {
                     cart.userData.step = -cart.userData.step;
                 }
-                cart.userData.moving = !cart.userData.moving;
+                cart.userData.moving = true;
+            } else {
+                cart.userData.moving = false;
             }
             break;
+        // 'w' and 'W'
         case 87:
         case 119:
-            if (!cart.userData.moving) {
+            if (cart.position.x < 45.25) {
                 if (cart.userData.step < 0) {
                     cart.userData.step = -cart.userData.step;
                 }
-                cart.userData.moving = !cart.userData.moving;
+                cart.userData.moving = true;
+            } else {
+                cart.userData.moving = false;
             }
             break;
     }
