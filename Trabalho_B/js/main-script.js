@@ -12,6 +12,7 @@ var geometry, material, material2, mesh;
 var cart, upperCrane, cable;
 var current_camera = "Side Camera";
 var cameras = {};
+const rotStep = 0.01;
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -237,6 +238,8 @@ function createUpperCrane(obj, x, y, z) {
     upperCrane.position.set(x, y, z);
     upperCrane.add(new THREE.AxesHelper(10));
 
+    upperCrane.userData = { rotStep: rotStep, rotating: false};
+
     addBoom(upperCrane, 1.25, 0, 0);
     addCounterWeight(upperCrane, -6.75, -1.5, 0);
     addCraneHolder(upperCrane, 0, 1, 0);
@@ -326,6 +329,9 @@ function init() {
 function animate() {
     'use strict';
 
+    if (upperCrane.userData.rotating) {
+        upperCrane.rotation.y += upperCrane.userData.rotStep;
+    }
     if (cart.userData.moving) {
         if (cart.position.x >= 3.5 ) {
             cart.position.x += cart.userData.step * 0.1;
@@ -427,6 +433,19 @@ function onKeyDown(e) {
             }
             cart.userData.moving = true;
             break;
+        // 'E' and 'E'
+        case 69:
+        case 101:
+            upperCrane.userData.rotStep = rotStep;
+            upperCrane.userData.rotating = true;
+            break;
+        // 'D' and 'd'
+        case 68:
+        case 100:
+            upperCrane.userData.rotStep = -rotStep;    
+            upperCrane.userData.rotating = true;
+            break;
+            
     }
 }
 
@@ -436,25 +455,26 @@ function onKeyDown(e) {
 function onKeyUp(e){
     'use strict';
     switch (e.keyCode) {
-        // 'a' and 'A'
+        // 'a', 'A', 'q', 'Q'
         case 65:
         case 97:
-            cable.userData.moving = false;
-            break;
-        // 'q' and 'Q'
         case 81:
         case 113:
             cable.userData.moving = false;
             break;
-        // 's' and 'S'
+        // 's', 'S', 'w', 'W'
         case 83:
         case 115:       
-            cart.userData.moving = false
-            break;
-        // 'w' and 'W'
         case 87:
         case 119:
             cart.userData.moving = false;
+            break;
+        // 'E', 'e', 'D', 'd'
+        case 68:
+        case 100:
+        case 69:
+        case 101:
+            upperCrane.userData.rotating = false;
             break;
     }
 }
