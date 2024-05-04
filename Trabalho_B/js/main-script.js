@@ -9,10 +9,14 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 //////////////////////
 var camera, scene, renderer;
 var geometry, material, material2, mesh;
-var cart, upperCrane, cable;
+var cart, upperCrane, cable, hook;
 var current_camera = "Side Camera";
 var cameras = {};
 const rotStep = 0.01;
+const clawRotStep = 0.01;
+const cableHeight = 20;
+const cartHeight = 1;
+const hookBlockHeight = 1;
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -55,6 +59,7 @@ function createFrontalCamera() {
 function createSideCamera() {
     'use strict';
 
+    //createCamera(30, 40, 10);
     createCamera(0, 40, 100);
 
     cameras["Side Camera"] = camera;
@@ -179,10 +184,42 @@ function addCabin(obj, x, y, z) {
     obj.add(mesh);
 }
 
+function addHookClaw(obj, x, y, z) {
+    'use strict';
+
+    geometry = new THREE.CylinderGeometry(0.5, 0, 2, 4);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.rotateY(Math.PI/4);
+    mesh.position.set(x, y - 0.5, z);
+
+    obj.add(mesh);
+}
+
+function addHookBlock(obj, x, y, z) {
+    'use strict';
+
+    geometry = new THREE.BoxGeometry(2, 1, 2);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y, z);
+
+    obj.add(mesh);
+}
+
 function createHook(obj, x, y, z) {
     'use strict';
 
-    var hook = new THREE.Object3D();
+    hook = new THREE.Object3D();
+    hook.userData = { rotStep: clawRotStep, rotating: false, moving: false};
+    hook.position.set(x, y, z);
+    hook.add(new THREE.AxesHelper(10));
+
+    addHookBlock(hook, 0, 0, 0);
+    addHookClaw(hook, 0.7, 0, 0.7);
+    addHookClaw(hook, 0.7, 0, -0.7);
+    addHookClaw(hook, -0.7, 0, 0.7);
+    addHookClaw(hook, -0.7, 0, -0.7);
+
+
     obj.add(hook);
 }
 
@@ -194,9 +231,9 @@ function addCart(obj, x, y, z) {
 }
 
 function addCable(obj, x, y, z) {
-    geometry = new THREE.CylinderGeometry(0.3, 0.3, 20);
+    geometry = new THREE.CylinderGeometry(0.3, 0.3, cableHeight);
     mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x, y - 10, z);
+    mesh.position.set(x, y - cableHeight/2, z);
     obj.add(mesh);
 }
 
@@ -204,7 +241,7 @@ function createCable(obj, x, y, z) {
     'use strict';
 
     cable = new THREE.Object3D();
-    cable.userData = { length: 20, step: 0.03, moving: false };
+    cable.userData = { step: 0.03, moving: false };
     cable.position.set(x, y, z);
 
     cable.add(new THREE.AxesHelper(10));
@@ -218,16 +255,15 @@ function createCart(obj, x, y, z) {
     'use strict';
 
     cart = new THREE.Object3D();
-    cart.position.set(x, y, z);
+    cart.position.set(x, y - 0.5, z);
     cart.add(new THREE.AxesHelper(10));
 
     cart.userData = { step: 0.7, moving: false };
 
     addCart(cart, 0, 0, 0);
+    createCable(cart, 0, -(cartHeight/2), 0);
+    createHook(cart, 0, -(cableHeight + cartHeight/2 + hookBlockHeight/2), 0);
 
-    createCable(cart, 0, -1, 0);
-
-    createHook(cart)
     obj.add(cart);
 }
 
@@ -348,11 +384,13 @@ function animate() {
     if (cable.userData.moving) {
         if (cable.scale.y >= 0) {
             cable.scale.y += cable.userData.step * 0.1;
+            hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
         } else {
             cable.scale.y = 0;
         }
         if (cable.scale.y <= 2.2) {
             cable.scale.y += cable.userData.step * 0.1;
+            hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
         } else {
             cable.scale.y = 2.2;
         }
