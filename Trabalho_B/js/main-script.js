@@ -17,6 +17,9 @@ const clawRotStep = 0.01;
 const cableHeight = 20;
 const cartHeight = 1;
 const hookBlockHeight = 1;
+const containerDepth = 20;
+const containerLength = 25;
+const containerHeight = 5;
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -30,7 +33,8 @@ function createScene(){
 
     scene.add(new THREE.AxesHelper(10));
 
-    createCrane(0,0,0);
+    createCrane(0, 0, 0);
+    createContainer(30, 0, 0);
 }
 
 //////////////////////
@@ -304,6 +308,48 @@ function createCrane(x, y, z) {
 
 }
 
+function addContainerBase(obj, x, y, z) {
+    'use strict'
+
+    geometry = new THREE.BoxGeometry(containerLength, 1, containerDepth);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y + 0.5, z);
+    obj.add(mesh);
+}
+
+function addContainerWall(obj, x, y, z, len) {
+    'use strict'
+
+    if (len == containerDepth) {
+        geometry = new THREE.BoxGeometry(1, containerHeight, len);
+    }
+    if (len == containerLength) {
+        geometry = new THREE.BoxGeometry(len, containerHeight, 1);
+    }
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y + containerHeight/2, z);
+    obj.add(mesh);
+}
+
+function createContainer(x, y, z) {
+    'use strict'
+
+    var container = new THREE.Object3D();
+
+    material = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true });
+    material2 = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+
+    addContainerBase(container, 0, 0, 0);
+    addContainerWall(container, containerLength/2, 0, 0, containerDepth);
+    addContainerWall(container, -containerLength/2, 0, 0, containerDepth);
+    addContainerWall(container, 0, 0, containerDepth/2, containerLength);
+    addContainerWall(container, 0, 0, -containerDepth/2, containerLength);
+
+    container.position.set(x, y, z);
+
+    scene.add(container);
+
+}
 //////////////////////
 /* CHECK COLLISIONS */
 //////////////////////
