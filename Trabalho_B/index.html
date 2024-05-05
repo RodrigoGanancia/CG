@@ -13,6 +13,19 @@
         }
     </script>
     <style>
+        #number-display {
+            position: fixed;
+            top: 15px;
+            color: rgba(122, 227, 225);
+            background: rgba(133, 28, 30);
+            padding: 5px;
+            border-radius: 5px;    
+            left: 15px;
+            font-size: 30px;
+            z-index: 1;
+            font-family: Courier, sans-serif;
+        }
+
         #hud {
             position: fixed;
             bottom: 30px;
@@ -31,15 +44,72 @@
     </style>
 </head>
 <body>
+    <div id="number-display">Camera: 2</div>
     <div id="hud">
         <p>How to control the Crane:</p>
         <br>
-        <p>Move steel cable Up: E</p>
-        <p>Move steel cable Down: D</p>
-        <p>Move cart forwards: W</p>
-        <p>Move cart backwards: S</p>
-        <p>Move crane boom: A/Q</p>
+        <p id="line-up">Move steel cable Up: E</p>
+        <p id="line-down">Move steel cable Down: D</p>
+        <p id="line-forward">Move cart forwards: W</p>
+        <p id="line-backward">Move cart backwards: S</p>
+        <p id="line-movement">Move crane boom: A/Q</p>
     </div>
     <script type="module" src="js/main-script.js"></script>
+    <script>
+        window.addEventListener('keydown', function(event) {
+            var numberDisplay = document.getElementById('number-display');
+
+            if (!isNaN(event.key) && event.key >= 1 && event.key <= 6) {
+                numberDisplay.textContent = "Camera: " + event.key;
+                numberDisplay.style.color = 'yellow';  
+
+                setTimeout(function() {
+                    numberDisplay.style.color = 'rgba(122, 227, 225)';
+                }, 500);
+    }
+            if (event.key === 'E' || event.key === 'e') {
+                var lineUp = document.getElementById('line-up');
+                lineUp.style.color = 'rgba(255, 255, 0, 1)'; 
+            }
+            if (event.key === 'D' || event.key === 'd') {
+                var lineDown = document.getElementById('line-down');
+                lineDown.style.color = 'rgba(255, 255, 0, 1)'; 
+            }
+            if (event.key === 'W' || event.key === 'w') {
+                var lineForward = document.getElementById('line-forward');
+                lineForward.style.color = 'rgba(255, 255, 0, 1)'; 
+            }
+            if (event.key === 'S' || event.key === 's') {
+                var lineBackward = document.getElementById('line-backward');
+                lineBackward.style.color = 'rgba(255, 255, 0, 1)'; 
+            }
+            if (event.key === 'A' || event.key === 'a' || event.key === 'Q' || event.key === 'q') {
+                var lineMovement = document.getElementById('line-movement');
+                lineMovement.style.color = 'rgba(255, 255, 0, 1)'; 
+            }
+        });
+        window.addEventListener('keyup', function(event) {
+        if (event.key === 'E' || event.key === 'e') {
+            var lineUp = document.getElementById('line-up');
+            lineUp.style.color = 'rgba(122, 227, 225)'; 
+        }
+        if (event.key === 'D' || event.key === 'd') {
+            var lineDown = document.getElementById('line-down');
+            lineDown.style.color = 'rgba(122, 227, 225)'; 
+        }
+        if (event.key === 'W' || event.key === 'w') {
+            var lineForward = document.getElementById('line-forward');
+            lineForward.style.color = 'rgba(122, 227, 225)'; 
+        }
+        if (event.key === 'S' || event.key === 's') {
+            var lineBackward = document.getElementById('line-backward');
+            lineBackward.style.color = 'rgba(122, 227, 225)'; 
+        }
+        if (event.key === 'A' || event.key === 'a' || event.key === 'Q' || event.key === 'q') {
+            var lineMovement = document.getElementById('line-movement');
+            lineMovement.style.color = 'rgba(122, 227, 225)'; 
+        }
+    });
+    </script>
 </body>
 </html>
