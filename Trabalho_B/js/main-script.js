@@ -29,7 +29,7 @@ function createScene(){
     'use strict';
 
     scene = new THREE.Scene();
-    // scene.background = new THREE.Color(0x7195a3);
+    scene.background = new THREE.Color(0x7195a3);
 
     scene.add(new THREE.AxesHelper(10));
 
@@ -492,18 +492,14 @@ function onKeyDown(e) {
         // 'a' and 'A'
         case 65:
         case 97:
-            if (cable.userData.step > 0) {
-                cable.userData.step = -cable.userData.step;
-            }
-            cable.userData.moving = true;
+            upperCrane.userData.rotStep = -rotStep;    
+            upperCrane.userData.rotating = true;
             break;
         // 'q' and 'Q'
         case 81:
         case 113:
-            if (cable.userData.step < 0) {
-                cable.userData.step = -cable.userData.step;
-            }
-            cable.userData.moving = true;
+            upperCrane.userData.rotStep = rotStep;
+            upperCrane.userData.rotating = true;
             break;
         // 's' and 'S'
         case 83:
@@ -524,14 +520,18 @@ function onKeyDown(e) {
         // 'E' and 'E'
         case 69:
         case 101:
-            upperCrane.userData.rotStep = rotStep;
-            upperCrane.userData.rotating = true;
+            if (cable.userData.step > 0) {
+                cable.userData.step = -cable.userData.step;
+            }
+            cable.userData.moving = true;
             break;
         // 'D' and 'd'
         case 68:
         case 100:
-            upperCrane.userData.rotStep = -rotStep;    
-            upperCrane.userData.rotating = true;
+            if (cable.userData.step < 0) {
+                cable.userData.step = -cable.userData.step;
+            }
+            cable.userData.moving = true;
             break;
             
     }
@@ -548,7 +548,7 @@ function onKeyUp(e){
         case 97:
         case 81:
         case 113:
-            cable.userData.moving = false;
+            upperCrane.userData.rotating = false;
             break;
         // 's', 'S', 'w', 'W'
         case 83:
@@ -562,7 +562,7 @@ function onKeyUp(e){
         case 100:
         case 69:
         case 101:
-            upperCrane.userData.rotating = false;
+            cable.userData.moving = false;
             break;
     }
 }
