@@ -8,7 +8,8 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 /* GLOBAL VARIABLES */
 //////////////////////
 var camera, scene, renderer;
-var geometry, material, material2, mesh;
+var material = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true });
+var geometry, mesh;
 var cart, upperCrane, cable, hook;
 var current_camera = "Side Camera";
 var cameras = {};
@@ -295,9 +296,6 @@ function createCrane(x, y, z) {
 
     var crane = new THREE.Object3D();
 
-    material = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true });
-    material2 = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-
     addBase(crane, 0, 0, 0);
     addTower(crane, 0, 3, 0);
     createUpperCrane(crane, 0, 49.5, 0);
@@ -336,9 +334,6 @@ function createContainer(x, y, z) {
 
     var container = new THREE.Object3D();
 
-    material = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true });
-    material2 = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-
     addContainerBase(container, 0, 0, 0);
     addContainerWall(container, containerLength/2, 0, 0, containerDepth);
     addContainerWall(container, -containerLength/2, 0, 0, containerDepth);
@@ -348,7 +343,6 @@ function createContainer(x, y, z) {
     container.position.set(x, y, z);
 
     scene.add(container);
-
 }
 //////////////////////
 /* CHECK COLLISIONS */
@@ -467,6 +461,7 @@ function onKeyDown(e) {
     switch(e.keyCode) {
         // Switch to frontal camera
         case 49:
+            material.wireframe = !material.wireframe;
             current_camera = "Frontal Camera";
             break;
         // Switch to side camera
