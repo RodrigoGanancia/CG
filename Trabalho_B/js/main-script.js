@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { VRButton } from 'three/addons/webxr/VRButton.js';
-import * as Stats from 'three/addons/libs/stats.module.js';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+// import { VRButton } from 'three/addons/webxr/VRButton.js';
+// import * as Stats from 'three/addons/libs/stats.module.js';
+// import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 //////////////////////
 /* GLOBAL VARIABLES */
@@ -13,6 +13,7 @@ var geometry, mesh;
 var cart, upperCrane, cable, hook;
 var current_camera = "Side Camera";
 var cameras = {};
+var hook_world_position = new THREE.Vector3();
 const rotStep = 0.01;
 const clawRotStep = 0.01;
 const cableHeight = 20;
@@ -84,16 +85,16 @@ function createOrthogonalCamera() {
     var width = window.innerWidth;
     var height = window.innerHeight;
     var aspectRatio = width / height;
-    var cameraWidth = 250; // Width of the visible scene
-    var cameraHeight = cameraWidth / aspectRatio; // Calculate height based on aspect ratio
+    var cameraWidth = 250;
+    var cameraHeight = cameraWidth / aspectRatio;
 
     camera = new THREE.OrthographicCamera(
-    cameraWidth / -2, // Left
-    cameraWidth / 2,  // Right
-    cameraHeight / 2, // Top
-    cameraHeight / -2, // Bottom
-    1, // Near
-    1000 // Far
+    cameraWidth / -2, 
+    cameraWidth / 2,
+    cameraHeight / 2,
+    cameraHeight / -2,
+    1,
+    1000
 );
     camera.position.x = 20;
     camera.position.z = 70;
@@ -112,7 +113,19 @@ function createPerspectiveCamera() {
 
 function createHookCamera() {
     'use strict';
-    createCamera(100, 100, 100);
+    camera = new THREE.PerspectiveCamera(70,
+                                         window.innerWidth / window.innerHeight,
+                                         1,
+                                         1000);
+
+    hook.getWorldPosition(hook_world_position);
+
+    var x = hook_world_position.x;
+    var y = hook_world_position.y;
+    var z = hook_world_position.z;
+
+    camera.position.set(x, y, z);
+    camera.lookAt(x, 0, z);
 
     cameras["Hook Camera"] = camera;
 }
@@ -124,6 +137,17 @@ function createCameras() {
     createOrthogonalCamera();
     createPerspectiveCamera();
     createHookCamera();
+}
+
+function updateHookCamera() {
+    hook.getWorldPosition(hook_world_position);
+
+    var x = hook_world_position.x;
+    var y = hook_world_position.y;
+    var z = hook_world_position.z;
+
+    cameras["Hook Camera"].position.set(x, y, z);
+    cameras["Hook Camera"].lookAt(x, 0, z);
 }
 
 /////////////////////
@@ -408,17 +432,19 @@ function animate() {
 
     if (upperCrane.userData.rotating) {
         upperCrane.rotation.y += upperCrane.userData.rotStep;
+        updateHookCamera();
     }
     if (cart.userData.moving) {
         if (cart.position.x >= 3.5 ) {
             cart.position.x += cart.userData.step * 0.1;
+            updateHookCamera();
         } else {
             cart.position.x = 3.5;
         }
         if (cart.position.x <= 45.25) {
             cart.position.x += cart.userData.step * 0.1;
+            updateHookCamera();
         } else {
-
             cart.position.x = 45.25;
         }
     }
@@ -426,12 +452,14 @@ function animate() {
         if (cable.scale.y >= 0) {
             cable.scale.y += cable.userData.step * 0.1;
             hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
+            updateHookCamera();
         } else {
             cable.scale.y = 0;
         }
         if (cable.scale.y <= 2.2) {
             cable.scale.y += cable.userData.step * 0.1;
             hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
+            updateHookCamera();
         } else {
             cable.scale.y = 2.2;
         }
@@ -459,30 +487,33 @@ function onKeyDown(e) {
     'use strict';
     
     switch(e.keyCode) {
-        // Switch to frontal camera
+        // '1' Switch to frontal camera
         case 49:
-            material.wireframe = !material.wireframe;
             current_camera = "Frontal Camera";
             break;
-        // Switch to side camera
+        // '2' Switch to side camera
         case 50:
             current_camera = "Side Camera";
             break;
-        // Switch to top camera
+        // '3' Switch to top camera
         case 51:
             current_camera = "Top Camera";
             break;
-        // Switch to orthogonal camera
+        // '4' Switch to orthogonal camera
         case 52:
             current_camera = "Orthogonal Camera";
             break;
-        // Switch to perspective camera
+        // '5' Switch to perspective camera
         case 53:
             current_camera = "Perspective Camera";
             break;
-        // Switch to perspective camera
+        // '6' Switch to perspective camera
         case 54:
             current_camera = "Hook Camera";
+            break;
+        // Numpad 1 alternate between wireframe and solid
+        case 96:
+            material.wireframe = !material.wireframe;
             break;
         // 'a' and 'A'
         case 65:
