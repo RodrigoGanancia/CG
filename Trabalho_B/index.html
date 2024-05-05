@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <meta charset="utf-8" >
+    <meta charset="utf-8">
     <title>Crane!</title>
     <link rel="stylesheet" href="css/style.css">
     <script type="importmap">
@@ -12,8 +12,34 @@
           }
         }
     </script>
+    <style>
+        #hud {
+            position: fixed;
+            bottom: 30px;
+            left: 40px;
+            color: rgba(122, 227, 225);
+            z-index: 1;
+            background: rgba(133, 28, 30);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: Courier, sans-serif;
+        }
+        #hud p {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
 </head>
 <body>
+    <div id="hud">
+        <p>How to use Crane:</p>
+        <br>
+        <p>Move steel cable Up: A</p>
+        <p>Move steel cable Down: Q</p>
+        <p>Move cart forwards: W</p>
+        <p>Move cart backwards: S</p>
+        <p>Move crane boom: E/D</p>
+    </div>
     <script type="module" src="js/main-script.js"></script>
 </body>
 </html>

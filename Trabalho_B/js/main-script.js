@@ -403,6 +403,7 @@ function init() {
 
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
+    window.addEventListener('resize', onResize, false);
 }
 
 /////////////////////
@@ -452,6 +453,9 @@ function animate() {
 function onResize() { 
     'use strict';
 
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 ///////////////////////
