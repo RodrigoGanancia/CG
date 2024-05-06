@@ -13,10 +13,14 @@ var geometry, mesh;
 var cart, upperCrane, cable, hook;
 var current_camera = "Hook Camera";
 var cameras = {};
-var boxes = [];
-const n_boxes = 6;
-const rotStep = 0.01;
-const clawRotStep = 0.01;
+var hook_world_position = new THREE.Vector3();
+var loads = [];
+var colisionLoad;
+var isInAnimation = false;
+const n_loads = 6;
+const cartSpeed = 0.07;
+const rotStepCrane = 0.01;
+const rotStepHook = 0.01;
 const cableHeight = 20;
 const cartHeight = 1;
 const hookBlockHeight = 1;
@@ -260,7 +264,7 @@ function createHook(obj, x, y, z) {
     'use strict';
 
     hook = new THREE.Object3D();
-    hook.userData = { rotStep: clawRotStep, rotating: false, moving: false};
+    hook.userData = { rotStep: rotStepHook, rotating: false, moving: false};
     hook.position.set(x, y, z);
     hook.add(new THREE.AxesHelper(10));
 
@@ -269,7 +273,6 @@ function createHook(obj, x, y, z) {
     addHookClaw(hook, 0.7, 0, -0.7);
     addHookClaw(hook, -0.7, 0, 0.7);
     addHookClaw(hook, -0.7, 0, -0.7);
-
 
     obj.add(hook);
 }
@@ -309,7 +312,7 @@ function createCart(obj, x, y, z) {
     cart.position.set(x, y - 0.5, z);
     cart.add(new THREE.AxesHelper(10));
 
-    cart.userData = { step: 0.7, moving: false };
+    cart.userData = { step: cartSpeed, moving: false };
 
     addCart(cart, 0, 0, 0);
     createCable(cart, 0, -(cartHeight/2), 0);
@@ -325,7 +328,7 @@ function createUpperCrane(obj, x, y, z) {
     upperCrane.position.set(x, y, z);
     upperCrane.add(new THREE.AxesHelper(10));
 
-    upperCrane.userData = { rotStep: rotStep, rotating: false};
+    upperCrane.userData = { rotStep: rotStepCrane, rotating: false};
 
     addBoom(upperCrane, 1.25, 0, 0);
     addCounterWeight(upperCrane, -6.75, -1.5, 0);
@@ -428,13 +431,13 @@ function createLoadGeometry() {
 function createLoads() {
     'use strict'
 
-    for (var i = 0; i < n_boxes; i++) {
+    for (var i = 0; i < n_loads; i++) {
         createLoadGeometry();
-        mesh = new THREE.Mesh(geometry, material);
-        var pos = generateRandomLocationLoad();
-        mesh.position.set(pos.x, pos.y, pos.z);
-        boxes.push(pos);
-        scene.add(mesh);
+        var load = new THREE.Mesh(geometry, material);
+        const pos = generateRandomLocationLoad()
+        load.position.set(pos.x, pos.y, pos.z);;
+        loads.push(load);
+        scene.add(load);
     }
 }
 //////////////////////
@@ -445,17 +448,18 @@ function checkCollisions(){
 
     var hookPosition = new THREE.Vector3();
     hook.getWorldPosition(hookPosition);
-
-    for (var i = 0; i < n_boxes; i++) {
-        if (hookLoadColisionCalculate(boxes[i], hookPosition)) {
-            console.log("COLISION!");
+    for (var i = 0; i < n_loads; i++) {
+        if (hookLoadColisionCalculate(loads[i].position, hookPosition)) {
+            colisionLoad = loads[i];
+            return true;
         }
     }
+    return false;
 }
 
 function hookLoadColisionCalculate(loadPos, hookPos) {
-    const radius = 3;
-    console.log(loadPos)
+    const radius = 1.5;
+
     return (2*radius)**2 >= (loadPos.x - hookPos.x)**2 + 
                             (loadPos.y - hookPos.y)**2 +
                             (loadPos.z - hookPos.z)**2;
@@ -467,7 +471,13 @@ function hookLoadColisionCalculate(loadPos, hookPos) {
 function handleCollisions(){
     'use strict';
 
-    
+    scene.remove(colisionLoad);
+    colisionLoad.position.set(0, -3, 0);
+    hook.add(colisionLoad);
+    upperCrane.userData.rotStep = (upperCrane.rotation.y % (2*Math.PI)) < Math.PI ? 
+                        rotStepCrane : -rotStepCrane;
+    cart.userData.step = cart.position.x < 30 ? cartSpeed : -cartSpeed;
+    isInAnimation = true;
 
 }
 
@@ -517,33 +527,52 @@ function init() {
 function animate() {
     'use strict';
 
-    if (upperCrane.userData.rotating) {
-        upperCrane.rotation.y += upperCrane.userData.rotStep;
+    if(checkCollisions()) {
+        handleCollisions();
     }
-    if (cart.userData.moving) {
-        if (cart.position.x >= 3.5 ) {
-            cart.position.x += cart.userData.step * 0.1;
+    if (isInAnimation) {
+        if(Math.abs(upperCrane.rotation.y % (2*Math.PI)) > Math.abs(upperCrane.userData.rotStep)) {
+            upperCrane.rotation.y += upperCrane.userData.rotStep;
         } else {
-            cart.position.x = 3.5;
+            isInAnimation = false;
         }
-        if (cart.position.x <= 45.25) {
-            cart.position.x += cart.userData.step * 0.1;
-        } else {
-            cart.position.x = 45.25;
+        if (Math.abs(cart.position.x + cart.userData.step - 30) < Math.abs(cart.position.x - 30)) {
+            cart.position.x += cart.userData.step;
+            isInAnimation = true;
         }
     }
-    if (cable.userData.moving) {
-        if (cable.scale.y >= 0) {
-            cable.scale.y += cable.userData.step * 0.1;
-            hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
-        } else {
-            cable.scale.y = 0;
+    else {
+        if (upperCrane.userData.rotating) {
+            upperCrane.rotation.y += upperCrane.userData.rotStep;
         }
-        if (cable.scale.y <= 2.3) {
-            cable.scale.y += cable.userData.step * 0.1;
-            hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
-        } else {
-            cable.scale.y = 2.3;
+        if (cart.userData.moving) {
+            if (cart.position.x >= 3.5 ) {
+                cart.position.x += cart.userData.step;
+            } else {
+                cart.position.x = 3.5;
+            }
+            if (cart.position.x <= 45.25) {
+                cart.position.x += cart.userData.step;
+            } else {
+                cart.position.x = 45.25;
+            }
+        }
+        if (cable.userData.moving) {
+            if (cable.scale.y >= 0) {
+                cable.scale.y += cable.userData.step * 0.1;
+                hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
+            } else {
+                cable.scale.y = 0;
+            }
+            if (cable.scale.y <= 2.3) {
+                cable.scale.y += cable.userData.step * 0.1;
+                hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
+            } else {
+                cable.scale.y = 2.3;
+            }
+        }
+        if (hook.userData.rotating) {
+        
         }
     }
     render();
@@ -600,13 +629,13 @@ function onKeyDown(e) {
         // 'a' and 'A'
         case 65:
         case 97:
-            upperCrane.userData.rotStep = -rotStep;    
+            upperCrane.userData.rotStep = -rotStepCrane;    
             upperCrane.userData.rotating = true;
             break;
         // 'q' and 'Q'
         case 81:
         case 113:
-            upperCrane.userData.rotStep = rotStep;
+            upperCrane.userData.rotStep = rotStepCrane;
             upperCrane.userData.rotating = true;
             break;
         // 's' and 'S'
@@ -641,10 +670,22 @@ function onKeyDown(e) {
             }
             cable.userData.moving = true;
             break;
-        // 'P' and 'p'
+        // 'R' and 'r'
+        case 82:
+        case 114:
+            hook.userData.rotStep = rotStepHook;
+            hook.userData.rotating = true;
+            break;
+         // 'F' and 'f'
+        case 70:
+        case 102:
+            hook.userData.rotStep = -rotStepHook;
+            hook.userData.rotating = true;
+            break;    
+         // 'P' and 'p'
         case 80:
         case 112:
-            checkCollisions();
+            console.log(upperCrane.rotation.y);
             break;
             
     }
