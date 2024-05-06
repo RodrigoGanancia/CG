@@ -13,7 +13,6 @@ var geometry, mesh;
 var cart, upperCrane, cable, hook;
 var current_camera = "Hook Camera";
 var cameras = {};
-var hook_world_position = new THREE.Vector3();
 var loads = [];
 var colisionLoad;
 var isInAnimation = false;
@@ -448,6 +447,7 @@ function checkCollisions(){
 
     var hookPosition = new THREE.Vector3();
     hook.getWorldPosition(hookPosition);
+
     for (var i = 0; i < n_loads; i++) {
         if (hookLoadColisionCalculate(loads[i].position, hookPosition)) {
             colisionLoad = loads[i];
@@ -458,6 +458,8 @@ function checkCollisions(){
 }
 
 function hookLoadColisionCalculate(loadPos, hookPos) {
+    'use strict'
+
     const radius = 1.5;
 
     return (2*radius)**2 >= (loadPos.x - hookPos.x)**2 + 
@@ -474,11 +476,13 @@ function handleCollisions(){
     scene.remove(colisionLoad);
     colisionLoad.position.set(0, -3, 0);
     hook.add(colisionLoad);
-    upperCrane.userData.rotStep = (upperCrane.rotation.y % (2*Math.PI)) < Math.PI ? 
-                        rotStepCrane : -rotStepCrane;
-    cart.userData.step = cart.position.x < 30 ? cartSpeed : -cartSpeed;
     isInAnimation = true;
-
+    if(upperCrane.rotation.y > 0) {
+        upperCrane.userData.rotStep = (upperCrane.rotation.y % (2*Math.PI)) < Math.PI ? -rotStepCrane : rotStepCrane;
+    }  else {
+        upperCrane.userData.rotStep = (upperCrane.rotation.y % (2*Math.PI)) < -Math.PI ? -rotStepCrane : rotStepCrane;
+    }
+    cart.userData.step = cart.position.x < 30 ? cartSpeed : -cartSpeed;
 }
 
 ////////////
