@@ -11,9 +11,8 @@ var camera, scene, renderer;
 var material = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true });
 var geometry, mesh;
 var cart, upperCrane, cable, hook;
-var current_camera = "Side Camera";
+var current_camera = "Hook Camera";
 var cameras = {};
-var hook_world_position = new THREE.Vector3();
 var boxes = [];
 const n_boxes = 6;
 const rotStep = 0.01;
@@ -121,16 +120,15 @@ function createHookCamera() {
                                          1,
                                          1000);
 
-    hook.getWorldPosition(hook_world_position);
+    var x = hook.position.x;
+    var y = hook.position.y;
+    var z = hook.position.z;
 
-    var x = hook_world_position.x;
-    var y = hook_world_position.y;
-    var z = hook_world_position.z;
-
-    camera.position.set(x, y, z);
-    camera.lookAt(x, 0, z);
+    camera.position.set(0, 0, 0);
+    camera.lookAt(x, y, z);
 
     cameras["Hook Camera"] = camera;
+    hook.add(camera);
 }
 
 function createCameras() {
@@ -140,17 +138,6 @@ function createCameras() {
     createOrthogonalCamera();
     createPerspectiveCamera();
     createHookCamera();
-}
-
-function updateHookCamera() {
-    hook.getWorldPosition(hook_world_position);
-
-    var x = hook_world_position.x;
-    var y = hook_world_position.y;
-    var z = hook_world_position.z;
-
-    cameras["Hook Camera"].position.set(x, y, z);
-    cameras["Hook Camera"].lookAt(x, 0, z);
 }
 
 /////////////////////
@@ -503,18 +490,15 @@ function animate() {
 
     if (upperCrane.userData.rotating) {
         upperCrane.rotation.y += upperCrane.userData.rotStep;
-        updateHookCamera();
     }
     if (cart.userData.moving) {
         if (cart.position.x >= 3.5 ) {
             cart.position.x += cart.userData.step * 0.1;
-            updateHookCamera();
         } else {
             cart.position.x = 3.5;
         }
         if (cart.position.x <= 45.25) {
             cart.position.x += cart.userData.step * 0.1;
-            updateHookCamera();
         } else {
             cart.position.x = 45.25;
         }
@@ -523,14 +507,12 @@ function animate() {
         if (cable.scale.y >= 0) {
             cable.scale.y += cable.userData.step * 0.1;
             hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
-            updateHookCamera();
         } else {
             cable.scale.y = 0;
         }
         if (cable.scale.y <= 2.3) {
             cable.scale.y += cable.userData.step * 0.1;
             hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
-            updateHookCamera();
         } else {
             cable.scale.y = 2.3;
         }
