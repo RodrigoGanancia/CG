@@ -14,6 +14,8 @@ var cart, upperCrane, cable, hook;
 var current_camera = "Side Camera";
 var cameras = {};
 var hook_world_position = new THREE.Vector3();
+var boxes = [];
+const n_boxes = 6;
 const rotStep = 0.01;
 const clawRotStep = 0.01;
 const cableHeight = 20;
@@ -37,6 +39,7 @@ function createScene(){
 
     createCrane(0, 0, 0);
     createContainer(30, 0, 0);
+    createBoxes(0, 0, 0);
 }
 
 //////////////////////
@@ -368,6 +371,19 @@ function createContainer(x, y, z) {
 
     scene.add(container);
 }
+
+function createBoxes(x, y, z) {
+    'use strict'
+
+    for (var i = 0; i < n_boxes; i++) {
+        geometry = new THREE.BoxGeometry(2, 2, 2);
+        mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(x + 10 * i, y, z + 40 * 1);
+        boxes.push(mesh);
+        scene.add(mesh);
+    }
+
+}
 //////////////////////
 /* CHECK COLLISIONS */
 //////////////////////
@@ -456,12 +472,12 @@ function animate() {
         } else {
             cable.scale.y = 0;
         }
-        if (cable.scale.y <= 2.2) {
+        if (cable.scale.y <= 2.3) {
             cable.scale.y += cable.userData.step * 0.1;
             hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
             updateHookCamera();
         } else {
-            cable.scale.y = 2.2;
+            cable.scale.y = 2.3;
         }
     }
     render();
