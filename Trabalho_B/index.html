@@ -12,39 +12,9 @@
           }
         }
     </script>
-    <style>
-        #number-display {
-            position: fixed;
-            top: 15px;
-            color: rgba(122, 227, 225);
-            background: rgba(133, 28, 30);
-            padding: 5px;
-            border-radius: 5px;    
-            left: 15px;
-            font-size: 30px;
-            z-index: 1;
-            font-family: Courier, sans-serif;
-        }
-
-        #hud {
-            position: fixed;
-            bottom: 30px;
-            left: 40px;
-            color: rgba(122, 227, 225);
-            z-index: 1;
-            background: rgba(133, 28, 30);
-            padding: 15px;
-            border-radius: 10px;
-            font-family: Courier, sans-serif;
-        }
-        #hud p {
-            margin: 0;
-            padding: 0;
-        }
-    </style>
 </head>
 <body>
-    <div id="number-display">Camera: 2</div>
+    <div id="number-display">Camera: 6</div>
     <div id="hud">
         <p>How to control the Crane:</p>
         <br>
@@ -69,46 +39,46 @@
     }
             if (event.key === 'E' || event.key === 'e') {
                 var lineUp = document.getElementById('line-up');
-                lineUp.style.color = 'rgba(255, 255, 0, 1)'; 
+                lineUp.style.color = 'yellow'; 
             }
             if (event.key === 'D' || event.key === 'd') {
                 var lineDown = document.getElementById('line-down');
-                lineDown.style.color = 'rgba(255, 255, 0, 1)'; 
+                lineDown.style.color = 'yellow'; 
             }
             if (event.key === 'W' || event.key === 'w') {
                 var lineForward = document.getElementById('line-forward');
-                lineForward.style.color = 'rgba(255, 255, 0, 1)'; 
+                lineForward.style.color = 'yellow'; 
             }
             if (event.key === 'S' || event.key === 's') {
                 var lineBackward = document.getElementById('line-backward');
-                lineBackward.style.color = 'rgba(255, 255, 0, 1)'; 
+                lineBackward.style.color = 'yellow'; 
             }
             if (event.key === 'A' || event.key === 'a' || event.key === 'Q' || event.key === 'q') {
                 var lineMovement = document.getElementById('line-movement');
-                lineMovement.style.color = 'rgba(255, 255, 0, 1)'; 
+                lineMovement.style.color = 'yellow'; 
             }
         });
         window.addEventListener('keyup', function(event) {
-        if (event.key === 'E' || event.key === 'e') {
-            var lineUp = document.getElementById('line-up');
-            lineUp.style.color = 'rgba(122, 227, 225)'; 
-        }
-        if (event.key === 'D' || event.key === 'd') {
-            var lineDown = document.getElementById('line-down');
-            lineDown.style.color = 'rgba(122, 227, 225)'; 
-        }
-        if (event.key === 'W' || event.key === 'w') {
-            var lineForward = document.getElementById('line-forward');
-            lineForward.style.color = 'rgba(122, 227, 225)'; 
-        }
-        if (event.key === 'S' || event.key === 's') {
-            var lineBackward = document.getElementById('line-backward');
-            lineBackward.style.color = 'rgba(122, 227, 225)'; 
-        }
-        if (event.key === 'A' || event.key === 'a' || event.key === 'Q' || event.key === 'q') {
-            var lineMovement = document.getElementById('line-movement');
-            lineMovement.style.color = 'rgba(122, 227, 225)'; 
-        }
+            if (event.key === 'E' || event.key === 'e') {
+                var lineUp = document.getElementById('line-up');
+                lineUp.style.color = 'rgba(122, 227, 225)'; 
+            }
+            if (event.key === 'D' || event.key === 'd') {
+                var lineDown = document.getElementById('line-down');
+                lineDown.style.color = 'rgba(122, 227, 225)'; 
+            }
+            if (event.key === 'W' || event.key === 'w') {
+                var lineForward = document.getElementById('line-forward');
+                lineForward.style.color = 'rgba(122, 227, 225)'; 
+            }
+            if (event.key === 'S' || event.key === 's') {
+                var lineBackward = document.getElementById('line-backward');
+                lineBackward.style.color = 'rgba(122, 227, 225)'; 
+            }
+            if (event.key === 'A' || event.key === 'a' || event.key === 'Q' || event.key === 'q') {
+                var lineMovement = document.getElementById('line-movement');
+                lineMovement.style.color = 'rgba(122, 227, 225)'; 
+            }
     });
     </script>
 </body>

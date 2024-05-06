@@ -28,6 +28,7 @@ const containerHeight = 5;
 /* CREATE SCENE(S) */
 /////////////////////
 
+
 function createScene(){
     'use strict';
 
@@ -35,6 +36,30 @@ function createScene(){
     scene.background = new THREE.Color(0x7195a3);
 
     scene.add(new THREE.AxesHelper(10));
+
+    // Create a texture loader
+    var loader = new THREE.TextureLoader();
+
+    // Ground
+    var groundTexture = loader.load('image.png');
+    groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set(25, 25);
+    var groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture });
+    var groundGeometry = new THREE.PlaneGeometry(1000, 1000);
+    var ground = new THREE.Mesh(groundGeometry, groundMaterial);
+    ground.rotation.x = - Math.PI / 2; 
+    scene.add(ground);
+    ground.position.y = -2;
+
+    // Sky
+    var skyTexture = loader.load('image copy.png');
+    var skyMaterial = new THREE.MeshBasicMaterial({ map: skyTexture });
+    var skyGeometry = new THREE.SphereGeometry(500, 60, 40);
+
+  
+    var sky = new THREE.Mesh(skyGeometry, skyMaterial);
+    sky.material.side = THREE.BackSide; 
+    scene.add(sky);
 
     createCrane(0, 0, 0);
     createContainer(30, 0, 0);
@@ -138,12 +163,19 @@ function createCameras() {
     createOrthogonalCamera();
     createPerspectiveCamera();
     createHookCamera();
+    
 }
 
 /////////////////////
 /* CREATE LIGHT(S) */
 /////////////////////
+function createLight(x, y, z) {
+    'use strict';
+    var pointLight = new THREE.PointLight('0x0000ff', 10, 1000);
 
+    pointLight.position.set(x, y, z);
+    scene.add(pointLight);
+}
 ////////////////////////
 /* CREATE OBJECT3D(S) */
 ////////////////////////
@@ -359,8 +391,6 @@ function createContainer(x, y, z) {
     scene.add(container);
 }
 
-
-
 function generateRandomLocationLoad() {
     var x,z;
 
@@ -372,7 +402,6 @@ function generateRandomLocationLoad() {
 
     return new THREE.Vector3(x, 1, z);
 }
-
 
 function createLoadGeometry() {
     'use strict'
@@ -474,7 +503,7 @@ function init() {
 
     createScene();
     createCameras();
-
+    createLight(0, 70, 70);
     render();
 
     window.addEventListener("keydown", onKeyDown);
@@ -564,8 +593,8 @@ function onKeyDown(e) {
         case 54:
             current_camera = "Hook Camera";
             break;
-        // Numpad 1 alternate between wireframe and solid
-        case 96:
+        // '7' Switch tocalternate between wireframe and solid
+        case 55:
             material.wireframe = !material.wireframe;
             break;
         // 'a' and 'A'
