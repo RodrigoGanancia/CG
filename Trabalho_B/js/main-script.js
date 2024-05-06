@@ -39,7 +39,7 @@ function createScene(){
 
     createCrane(0, 0, 0);
     createContainer(30, 0, 0);
-    createBoxes(0, 0, 0);
+    createLoads(0, 0, 0);
 }
 
 //////////////////////
@@ -372,17 +372,54 @@ function createContainer(x, y, z) {
     scene.add(container);
 }
 
-function createBoxes(x, y, z) {
+
+
+function generateRandomLocationLoad() {
+    var x,z;
+
+    do {
+        x = (Math.random() * 81) - 40;
+        z = (Math.random() * 81) - 40;
+    } while ((x > 16 && x < 44 && z > -12 && z < 12) ||
+             (x > - 7 && x < 7 && z > -7 && z < 7));
+
+    return new THREE.Vector3(x, 1, z);
+}
+
+
+function createLoadGeometry() {
+    'use strict'
+
+    switch(Math.floor(Math.random() * 5)) {
+        case 0:
+            geometry = new THREE.BoxGeometry(2, 2, 2);
+            break;
+        case 1:
+            geometry = new THREE.DodecahedronGeometry(2);
+            break;
+        case 2:
+            geometry = new THREE.IcosahedronGeometry(2);
+            break;
+        case 3:
+            geometry = new THREE.TorusGeometry(2);
+            break;
+        case 4:
+            geometry = new THREE.TorusKnotGeometry(2);
+            break;
+    }
+}
+
+function createLoads() {
     'use strict'
 
     for (var i = 0; i < n_boxes; i++) {
-        geometry = new THREE.BoxGeometry(2, 2, 2);
+        createLoadGeometry();
         mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(x + 10 * i, y, z + 40 * 1);
-        boxes.push(mesh);
+        var pos = generateRandomLocationLoad();
+        mesh.position.set(pos.x, pos.y, pos.z);
+        boxes.push(pos);
         scene.add(mesh);
     }
-
 }
 //////////////////////
 /* CHECK COLLISIONS */
@@ -390,6 +427,22 @@ function createBoxes(x, y, z) {
 function checkCollisions(){
     'use strict';
 
+    var hookPosition = new THREE.Vector3();
+    hook.getWorldPosition(hookPosition);
+
+    for (var i = 0; i < n_boxes; i++) {
+        if (hookLoadColisionCalculate(boxes[i], hookPosition)) {
+            console.log("COLISION!");
+        }
+    }
+}
+
+function hookLoadColisionCalculate(loadPos, hookPos) {
+    const radius = 3;
+    console.log(loadPos)
+    return (2*radius)**2 >= (loadPos.x - hookPos.x)**2 + 
+                            (loadPos.y - hookPos.y)**2 +
+                            (loadPos.z - hookPos.z)**2;
 }
 
 ///////////////////////
@@ -397,6 +450,8 @@ function checkCollisions(){
 ///////////////////////
 function handleCollisions(){
     'use strict';
+
+    
 
 }
 
@@ -574,6 +629,11 @@ function onKeyDown(e) {
                 cable.userData.step = -cable.userData.step;
             }
             cable.userData.moving = true;
+            break;
+        // 'P' and 'p'
+        case 80:
+        case 112:
+            checkCollisions();
             break;
             
     }
