@@ -404,7 +404,8 @@ function generateRandomLocationLoad() {
         x = (Math.random() * 81) - 40;
         z = (Math.random() * 81) - 40;
     } while ((x > 16 && x < 44 && z > -12 && z < 12) ||
-             (x > - 7 && x < 7 && z > -7 && z < 7));
+             (x > - 7 && x < 7 && z > -7 && z < 7) ||
+             (x**2 + z**2 > 40**2));
 
     return new THREE.Vector3(x, 1, z);
 }
