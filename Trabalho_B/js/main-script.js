@@ -13,7 +13,7 @@ var geometry, mesh;
 var cart, upperCrane, cable, hook;
 var current_camera = "Hook Camera";
 var cameras = {};
-var loads = [];
+var loads = [], claws = [];
 var colisionLoad;
 var isInAnimation = false;
 const n_loads = 6;
@@ -23,6 +23,8 @@ const rotStepHook = 0.01;
 const cableHeight = 20;
 const cartHeight = 1;
 const defaultCartX = 30;
+const maxHookClawY = -0.5;
+const minHookClawY = -0.75;
 const hookBlockHeight = 1;
 const containerDepth = 20;
 const containerLength = 25;
@@ -96,8 +98,8 @@ function createFrontalCamera() {
 function createSideCamera() {
     'use strict';
 
-    //createCamera(30, 40, 10);
-    createCamera(0, 40, 100);
+    createCamera(30, 40, 10);
+    //createCamera(0, 40, 100);
 
     cameras["Side Camera"] = camera;
 }
@@ -243,11 +245,12 @@ function addHookClaw(obj, x, y, z) {
     'use strict';
 
     geometry = new THREE.CylinderGeometry(0.5, 0, 2, 4);
-    mesh = new THREE.Mesh(geometry, material);
-    mesh.rotateY(Math.PI/4);
-    mesh.position.set(x, y - 0.5, z);
+    var claw = new THREE.Mesh(geometry, material);
+    //  claw.rotateY(Math.PI/4);
+    claw.position.set(x, y - 0.5, z);
 
-    obj.add(mesh);
+    obj.add(claw);
+    claws.push(claw);
 }
 
 function addHookBlock(obj, x, y, z) {
@@ -468,6 +471,23 @@ function hookLoadColisionCalculate(loadPos, hookPos) {
                             (loadPos.z - hookPos.z)**2;
 }
 
+function rotateAboutPoint(obj, point, axis, theta, pointIsWorld = false){
+  
+    if(pointIsWorld){
+        obj.parent.localToWorld(obj.position); // compensate for world coordinate
+    }
+  
+    obj.position.sub(point); // remove the offset
+    obj.position.applyAxisAngle(axis, theta); // rotate the POSITION
+    obj.position.add(point); // re-add the offset
+  
+    if(pointIsWorld){
+        obj.parent.worldToLocal(obj.position); // undo world coordinates compensation
+    }
+  
+    obj.rotateOnAxis(axis, theta); // rotate the OBJECT
+}
+
 ///////////////////////
 /* HANDLE COLLISIONS */
 ///////////////////////
@@ -578,8 +598,15 @@ function animate() {
                 cable.scale.y = 2.3;
             }
         }
-        if (hook.userData.rotating) {
-        
+        if (hook.userData.rotating && ((hook.userData.rotStep > 0 && (claws[0].position.y > minHookClawY))
+            || (hook.userData.rotStep < 0 && (claws[0].position.y < maxHookClawY)))) {
+            var axisToRotate = new THREE.Vector3();
+            const pivotPoint = new THREE.Vector3(0,1,0); // middle of hook
+            for (var i = 0; i < 4; i++) {
+                axisToRotate.set(claws[i].position.z, 0, -claws[i].position.x); 
+                axisToRotate.normalize();
+                rotateAboutPoint(claws[i], pivotPoint, axisToRotate, hook.userData.rotStep, false);
+            }
         }
     }
     render();
@@ -692,7 +719,7 @@ function onKeyDown(e) {
          // 'P' and 'p'
         case 80:
         case 112:
-            console.log(upperCrane.rotation.y);
+            console.log(claws[0].position.y);
             break;
             
     }
@@ -724,6 +751,13 @@ function onKeyUp(e){
         case 69:
         case 101:
             cable.userData.moving = false;
+            break;
+        // 'R', 'r', 'F', 'f'
+        case 82:
+        case 114:
+        case 70:
+        case 102:
+            hook.userData.rotating = false;
             break;
     }
 }
