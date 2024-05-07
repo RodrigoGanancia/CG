@@ -7,7 +7,7 @@ import * as THREE from 'three';
 //////////////////////
 /* GLOBAL VARIABLES */
 //////////////////////
-var camera, scene, renderer;
+var camera, scene, renderer, clock, delta;
 var material = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true });
 var geometry, mesh;
 var cart, upperCrane, cable, hook;
@@ -15,16 +15,21 @@ var current_camera = "Hook Camera";
 var cameras = {};
 var loads = [], claws = [];
 var colisionLoad;
-var isInAnimation = false;
+var isInAnimation = false, endAnimation;
 const n_loads = 6;
-const cartSpeed = 0.07;
-const rotStepCrane = 0.01;
-const rotStepHook = 0.01;
-const cableHeight = 20;
-const cartHeight = 1;
 const defaultCartX = 30;
 const maxHookClawY = -0.5;
 const minHookClawY = -0.75;
+
+// Speeds
+const cartSpeed = 7;
+const rotSpeedCrane = 1;
+const rotSpeedHook = 1;
+const cableSpeed = 0.3;
+
+// Lengths
+const cableHeight = 20;
+const cartHeight = 1;
 const hookBlockHeight = 1;
 const containerDepth = 20;
 const containerLength = 25;
@@ -98,8 +103,8 @@ function createFrontalCamera() {
 function createSideCamera() {
     'use strict';
 
-    createCamera(30, 40, 10);
-    //createCamera(0, 40, 100);
+    //createCamera(30, 40, 10);
+    createCamera(0, 40, 100);
 
     cameras["Side Camera"] = camera;
 }
@@ -267,7 +272,7 @@ function createHook(obj, x, y, z) {
     'use strict';
 
     hook = new THREE.Object3D();
-    hook.userData = { rotStep: rotStepHook, rotating: false, moving: false};
+    hook.userData = { rotSpeed: rotSpeedHook, rotating: false, moving: false};
     hook.position.set(x, y, z);
     hook.add(new THREE.AxesHelper(10));
 
@@ -298,7 +303,7 @@ function createCable(obj, x, y, z) {
     'use strict';
 
     cable = new THREE.Object3D();
-    cable.userData = { step: 0.03, moving: false };
+    cable.userData = { speed: cableSpeed, moving: false };
     cable.position.set(x, y, z);
 
     cable.add(new THREE.AxesHelper(10));
@@ -315,7 +320,7 @@ function createCart(obj, x, y, z) {
     cart.position.set(x, y - 0.5, z);
     cart.add(new THREE.AxesHelper(10));
 
-    cart.userData = { step: cartSpeed, moving: false };
+    cart.userData = { speed: cartSpeed, moving: false };
 
     addCart(cart, 0, 0, 0);
     createCable(cart, 0, -(cartHeight/2), 0);
@@ -331,7 +336,7 @@ function createUpperCrane(obj, x, y, z) {
     upperCrane.position.set(x, y, z);
     upperCrane.add(new THREE.AxesHelper(10));
 
-    upperCrane.userData = { rotStep: rotStepCrane, rotating: false};
+    upperCrane.userData = { rotSpeed: rotSpeedCrane, rotating: false};
 
     addBoom(upperCrane, 1.25, 0, 0);
     addCounterWeight(upperCrane, -6.75, -1.5, 0);
@@ -498,15 +503,18 @@ function handleCollisions(){
     scene.remove(colisionLoad);
     colisionLoad.position.set(0, -3, 0);
     hook.add(colisionLoad);
-    isInAnimation = true;
 
+    isInAnimation = true;
+    upperCrane.userData.moving = true;
+    upperCrane.userData.rotating = true;
+    
     if(upperCrane.rotation.y > 0) {
-        upperCrane.userData.rotStep = (upperCrane.rotation.y % (2*Math.PI)) > Math.PI ? rotStepCrane : -rotStepCrane;
+        upperCrane.userData.rotSpeed = (upperCrane.rotation.y % (2*Math.PI)) > Math.PI ? rotSpeedCrane : -rotSpeedCrane;
     }  else {
-        upperCrane.userData.rotStep = (upperCrane.rotation.y % (2*Math.PI)) > -Math.PI ? rotStepCrane : -rotStepCrane;
+        upperCrane.userData.rotSpeed = (upperCrane.rotation.y % (2*Math.PI)) > -Math.PI ? rotSpeedCrane : -rotSpeedCrane;
     }
 
-    cart.userData.step = cart.position.x < defaultCartX ? cartSpeed : -cartSpeed;
+    cart.userData.speed = cart.position.x < defaultCartX ? cartSpeed : -cartSpeed;
 }
 
 ////////////
@@ -542,6 +550,7 @@ function init() {
     createScene();
     createCameras();
     createLight(0, 70, 70);
+    clock = new THREE.Clock();
     render();
 
     window.addEventListener("keydown", onKeyDown);
@@ -558,55 +567,62 @@ function animate() {
     if(checkCollisions()) {
         handleCollisions();
     }
+    delta = clock.getDelta();
     if (isInAnimation) {
-        if(Math.abs(upperCrane.rotation.y % (2*Math.PI)) > Math.abs(upperCrane.userData.rotStep)) {
-            upperCrane.rotation.y += upperCrane.userData.rotStep;
+        console.log("rotation: ", Math.abs(upperCrane.rotation.y % (2*Math.PI)));
+        console.log("delta: ",  Math.abs(upperCrane.userData.rotSpeed * delta));
+        if(Math.abs(upperCrane.rotation.y % (2*Math.PI)) > Math.abs(upperCrane.userData.rotSpeed * delta)) {
+            upperCrane.rotation.y += upperCrane.userData.rotSpeed * delta;
         } else {
-            isInAnimation = false;
+            upperCrane.userData.rotating = false;
         }
-        if (Math.abs(cart.position.x + cart.userData.step - defaultCartX) < Math.abs(cart.position.x - defaultCartX)) {
-            cart.position.x += cart.userData.step;
-            isInAnimation = true;
+        //console.log("first", Math.abs(cart.position.x + cart.userData.speed * delta - defaultCartX));
+        //console.log(Math.abs(cart.position.x - defaultCartX));
+        if (Math.abs(cart.position.x + cart.userData.speed * delta - defaultCartX) < Math.abs(cart.position.x - defaultCartX)) {
+            cart.position.x += cart.userData.speed * delta;
+        } else {
+            cart.userData.moving = false;
         }
+        if (!upperCrane.userData.rotating && !cart.userData.moving) isInAnimation = false;
     }
     else {
         if (upperCrane.userData.rotating) {
-            upperCrane.rotation.y += upperCrane.userData.rotStep;
+            upperCrane.rotation.y += upperCrane.userData.rotSpeed * delta;
         }
         if (cart.userData.moving) {
             if (cart.position.x >= 3.5 ) {
-                cart.position.x += cart.userData.step;
+                cart.position.x += cart.userData.speed * delta;
             } else {
                 cart.position.x = 3.5;
             }
             if (cart.position.x <= 45.25) {
-                cart.position.x += cart.userData.step;
+                cart.position.x += cart.userData.speed * delta;
             } else {
                 cart.position.x = 45.25;
             }
         }
         if (cable.userData.moving) {
             if (cable.scale.y >= 0) {
-                cable.scale.y += cable.userData.step * 0.1;
+                cable.scale.y += cable.userData.speed * delta;
                 hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
             } else {
                 cable.scale.y = 0;
             }
             if (cable.scale.y <= 2.3) {
-                cable.scale.y += cable.userData.step * 0.1;
+                cable.scale.y += cable.userData.speed *  delta;
                 hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
             } else {
                 cable.scale.y = 2.3;
             }
         }
-        if (hook.userData.rotating && ((hook.userData.rotStep > 0 && (claws[0].position.y > minHookClawY))
-            || (hook.userData.rotStep < 0 && (claws[0].position.y < maxHookClawY)))) {
+        if (hook.userData.rotating && ((hook.userData.rotSpeed > 0 && (claws[0].position.y > minHookClawY))
+            || (hook.userData.rotSpeed < 0 && (claws[0].position.y < maxHookClawY)))) {
             var axisToRotate = new THREE.Vector3();
             const pivotPoint = new THREE.Vector3(0,1,0); // middle of hook
             for (var i = 0; i < 4; i++) {
                 axisToRotate.set(claws[i].position.z, 0, -claws[i].position.x); 
                 axisToRotate.normalize();
-                rotateAboutPoint(claws[i], pivotPoint, axisToRotate, hook.userData.rotStep, false);
+                rotateAboutPoint(claws[i], pivotPoint, axisToRotate, hook.userData.rotSpeed * delta, false);
             }
         }
     }
@@ -664,57 +680,57 @@ function onKeyDown(e) {
         // 'a' and 'A'
         case 65:
         case 97:
-            upperCrane.userData.rotStep = -rotStepCrane;    
+            upperCrane.userData.rotSpeed = -rotSpeedCrane;    
             upperCrane.userData.rotating = true;
             break;
         // 'q' and 'Q'
         case 81:
         case 113:
-            upperCrane.userData.rotStep = rotStepCrane;
+            upperCrane.userData.rotSpeed = rotSpeedCrane;
             upperCrane.userData.rotating = true;
             break;
         // 's' and 'S'
         case 83:
         case 115:       
-            if (cart.userData.step > 0) {
-                cart.userData.step = -cart.userData.step;
+            if (cart.userData.speed > 0) {
+                cart.userData.speed = -cart.userData.speed;
             }
             cart.userData.moving = true;
             break;
         // 'w' and 'W'
         case 87:
         case 119:
-            if (cart.userData.step < 0) {
-                cart.userData.step = -cart.userData.step;
+            if (cart.userData.speed < 0) {
+                cart.userData.speed = -cart.userData.speed;
             }
             cart.userData.moving = true;
             break;
         // 'E' and 'E'
         case 69:
         case 101:
-            if (cable.userData.step > 0) {
-                cable.userData.step = -cable.userData.step;
+            if (cable.userData.speed > 0) {
+                cable.userData.speed = -cable.userData.speed;
             }
             cable.userData.moving = true;
             break;
         // 'D' and 'd'
         case 68:
         case 100:
-            if (cable.userData.step < 0) {
-                cable.userData.step = -cable.userData.step;
+            if (cable.userData.speed < 0) {
+                cable.userData.speed = -cable.userData.speed;
             }
             cable.userData.moving = true;
             break;
         // 'R' and 'r'
         case 82:
         case 114:
-            hook.userData.rotStep = rotStepHook;
+            hook.userData.rotSpeed = rotSpeedHook;
             hook.userData.rotating = true;
             break;
          // 'F' and 'f'
         case 70:
         case 102:
-            hook.userData.rotStep = -rotStepHook;
+            hook.userData.rotSpeed = -rotSpeedHook;
             hook.userData.rotating = true;
             break;    
          // 'P' and 'p'
