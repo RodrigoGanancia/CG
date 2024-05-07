@@ -475,18 +475,18 @@ function hookLoadColisionCalculate(loadPos, hookPos) {
 function rotateAboutPoint(obj, point, axis, theta, pointIsWorld = false){
   
     if(pointIsWorld){
-        obj.parent.localToWorld(obj.position); // compensate for world coordinate
+        obj.parent.localToWorld(obj.position);
     }
   
-    obj.position.sub(point); // remove the offset
-    obj.position.applyAxisAngle(axis, theta); // rotate the POSITION
-    obj.position.add(point); // re-add the offset
+    obj.position.sub(point);
+    obj.position.applyAxisAngle(axis, theta);
+    obj.position.add(point);
   
     if(pointIsWorld){
-        obj.parent.worldToLocal(obj.position); // undo world coordinates compensation
+        obj.parent.worldToLocal(obj.position);
     }
   
-    obj.rotateOnAxis(axis, theta); // rotate the OBJECT
+    obj.rotateOnAxis(axis, theta);
 }
 
 ///////////////////////
@@ -631,7 +631,7 @@ function onResize() {
 ///////////////////////
 function onKeyDown(e) {
     'use strict';
-    
+    if (isInAnimation) return;
     switch(e.keyCode) {
         // '1' Switch to frontal camera
         case 49:
@@ -731,6 +731,9 @@ function onKeyDown(e) {
 ///////////////////////
 function onKeyUp(e){
     'use strict';
+
+    if (isInAnimation) return;
+    
     switch (e.keyCode) {
         // 'a', 'A', 'q', 'Q'
         case 65:
