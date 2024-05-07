@@ -22,6 +22,7 @@ const rotStepCrane = 0.01;
 const rotStepHook = 0.01;
 const cableHeight = 20;
 const cartHeight = 1;
+const defaultCartX = 30;
 const hookBlockHeight = 1;
 const containerDepth = 20;
 const containerLength = 25;
@@ -477,12 +478,14 @@ function handleCollisions(){
     colisionLoad.position.set(0, -3, 0);
     hook.add(colisionLoad);
     isInAnimation = true;
+
     if(upperCrane.rotation.y > 0) {
-        upperCrane.userData.rotStep = (upperCrane.rotation.y % (2*Math.PI)) < Math.PI ? -rotStepCrane : rotStepCrane;
+        upperCrane.userData.rotStep = (upperCrane.rotation.y % (2*Math.PI)) > Math.PI ? rotStepCrane : -rotStepCrane;
     }  else {
-        upperCrane.userData.rotStep = (upperCrane.rotation.y % (2*Math.PI)) < -Math.PI ? -rotStepCrane : rotStepCrane;
+        upperCrane.userData.rotStep = (upperCrane.rotation.y % (2*Math.PI)) > -Math.PI ? rotStepCrane : -rotStepCrane;
     }
-    cart.userData.step = cart.position.x < 30 ? cartSpeed : -cartSpeed;
+
+    cart.userData.step = cart.position.x < defaultCartX ? cartSpeed : -cartSpeed;
 }
 
 ////////////
@@ -540,7 +543,7 @@ function animate() {
         } else {
             isInAnimation = false;
         }
-        if (Math.abs(cart.position.x + cart.userData.step - 30) < Math.abs(cart.position.x - 30)) {
+        if (Math.abs(cart.position.x + cart.userData.step - defaultCartX) < Math.abs(cart.position.x - defaultCartX)) {
             cart.position.x += cart.userData.step;
             isInAnimation = true;
         }
