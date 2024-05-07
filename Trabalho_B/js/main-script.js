@@ -8,10 +8,15 @@ import * as THREE from 'three';
 /* GLOBAL VARIABLES */
 //////////////////////
 var camera, scene, renderer;
-var material = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true });
+var material  = new THREE.MeshToonMaterial({ color: 0xd47bc6});
+var material2 = new THREE.MeshToonMaterial({ color: 0xACA6A5});
+var material3 = new THREE.MeshToonMaterial({ color: 0x0091a3});
+var material4 = new THREE.MeshToonMaterial({ color: 0xff4370});
+var material5 = new THREE.MeshToonMaterial({ color: 0x43c5ff});
+
 var geometry, mesh;
 var cart, upperCrane, cable, hook;
-var current_camera = "Hook Camera";
+var current_camera = "Perspective Camera";
 var cameras = {};
 var loads = [], claws = [];
 var colisionLoad;
@@ -47,9 +52,9 @@ function createScene(){
     var loader = new THREE.TextureLoader();
 
     // Ground
-    var groundTexture = loader.load('image.png');
+    var groundTexture = loader.load('grass.webp');
     groundTexture.wrapS = groundTexture.wrapT = THREE.RepeatWrapping;
-    groundTexture.repeat.set(25, 25);
+    groundTexture.repeat.set(5, 5);
     var groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture });
     var groundGeometry = new THREE.PlaneGeometry(1000, 1000);
     var ground = new THREE.Mesh(groundGeometry, groundMaterial);
@@ -58,11 +63,12 @@ function createScene(){
     ground.position.y = -2;
 
     // Sky
-    var skyTexture = loader.load('image copy.png');
+    var skyTexture = loader.load('toy-story.jpg');
+    skyTexture.wrapS = skyTexture.wrapT = THREE.RepeatWrapping;
+    skyTexture.repeat.set(20, 20); 
     var skyMaterial = new THREE.MeshBasicMaterial({ map: skyTexture });
     var skyGeometry = new THREE.SphereGeometry(500, 60, 40);
 
-  
     var sky = new THREE.Mesh(skyGeometry, skyMaterial);
     sky.material.side = THREE.BackSide; 
     scene.add(sky);
@@ -130,7 +136,7 @@ function createOrthogonalCamera() {
     1000
 );
     camera.position.x = 20;
-    camera.position.z = 70;
+    camera.position.z = 70; // esta linha está repetida
     camera.position.z = 70;
     camera.lookAt(scene.position);
 
@@ -177,7 +183,7 @@ function createCameras() {
 /////////////////////
 function createLight(x, y, z) {
     'use strict';
-    var pointLight = new THREE.PointLight('0x0000ff', 10, 1000);
+    var pointLight = new THREE.PointLight('0xfffff', 19000, 1000);
 
     pointLight.position.set(x, y, z);
     scene.add(pointLight);
@@ -190,7 +196,7 @@ function addBoom(obj, x, y, z) {
     'use strict'
 
     geometry = new THREE.BoxGeometry(57.5, 2.5, 2.5);
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material4);
     mesh.position.set(x + 16.5, y, z);
     obj.add(mesh);
 }
@@ -199,7 +205,7 @@ function addCounterWeight(obj, x, y, z) {
     'use strict'
 
     geometry = new THREE.BoxGeometry(3, 2, 3);
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material3);
     mesh.position.set(x , y - 1, z);
     obj.add(mesh);
 }
@@ -208,7 +214,7 @@ function addBase(obj, x, y, z) {
     'use strict';
     
     geometry = new THREE.BoxGeometry(5, 3, 5);
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material4);
     mesh.position.set(x, y + 1.5, z);
     obj.add(mesh);
 }
@@ -217,7 +223,7 @@ function addTower(obj, x, y, z) {
     'use strict'
 
     geometry = new THREE.BoxGeometry(2.5, 45, 2.5);
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material5);
     mesh.position.set(x, y + 22.5, z);
     obj.add(mesh);
 }
@@ -226,7 +232,7 @@ function addCraneHolder(obj, x, y, z) {
     'use strict'
 
     geometry = new THREE.CylinderGeometry(0, 1.768, 6, 4, 1);
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material5);
     mesh.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
     mesh.position.set(x, y + 3, z);
     obj.add(mesh);
@@ -236,7 +242,7 @@ function addCabin(obj, x, y, z) {
     'use strict';
 
     geometry = new THREE.BoxGeometry(3, 3, 3);
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material4);
     mesh.position.set(x, y, z + 1.5);
     obj.add(mesh);
 }
@@ -245,7 +251,7 @@ function addHookClaw(obj, x, y, z) {
     'use strict';
 
     geometry = new THREE.CylinderGeometry(0.5, 0, 2, 4);
-    var claw = new THREE.Mesh(geometry, material);
+    var claw = new THREE.Mesh(geometry, material3);
     //  claw.rotateY(Math.PI/4);
     claw.position.set(x, y - 0.5, z);
 
@@ -257,7 +263,7 @@ function addHookBlock(obj, x, y, z) {
     'use strict';
 
     geometry = new THREE.BoxGeometry(2, 1, 2);
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material4);
     mesh.position.set(x, y, z);
 
     obj.add(mesh);
@@ -282,14 +288,14 @@ function createHook(obj, x, y, z) {
 
 function addCart(obj, x, y, z) {
     geometry = new THREE.BoxGeometry(2.5, 1, 2.5);
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material3);
     mesh.position.set(x, y - 0.5, z);
     obj.add(mesh);
 }
 
 function addCable(obj, x, y, z) {
     geometry = new THREE.CylinderGeometry(0.3, 0.3, cableHeight);
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material4);
     mesh.position.set(x, y - cableHeight/2, z);
     obj.add(mesh);
 }
@@ -362,7 +368,7 @@ function addContainerBase(obj, x, y, z) {
     'use strict'
 
     geometry = new THREE.BoxGeometry(containerLength, 1, containerDepth);
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material4);
     mesh.position.set(x, y + 0.5, z);
     obj.add(mesh);
 }
@@ -376,7 +382,7 @@ function addContainerWall(obj, x, y, z, len) {
     if (len == containerLength) {
         geometry = new THREE.BoxGeometry(len, containerHeight, 1);
     }
-    mesh = new THREE.Mesh(geometry, material);
+    mesh = new THREE.Mesh(geometry, material3);
     mesh.position.set(x, y + containerHeight/2, z);
     obj.add(mesh);
 }
@@ -541,7 +547,7 @@ function init() {
 
     createScene();
     createCameras();
-    createLight(0, 70, 70);
+    createLight(20, 50, 60);
     render();
 
     window.addEventListener("keydown", onKeyDown);
@@ -660,6 +666,10 @@ function onKeyDown(e) {
         // '7' Switch tocalternate between wireframe and solid
         case 55:
             material.wireframe = !material.wireframe;
+            material2.wireframe = !material2.wireframe;
+            material3.wireframe = !material3.wireframe;
+            material4.wireframe = !material4.wireframe;
+            material5.wireframe = !material5.wireframe;
             break;
         // 'a' and 'A'
         case 65:
