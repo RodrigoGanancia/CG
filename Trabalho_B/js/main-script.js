@@ -335,6 +335,23 @@ function createCart(obj, x, y, z) {
     obj.add(cart);
 }
 
+function addFrontRiser(obj, x, y, z) {
+    geometry = new THREE.CylinderGeometry(0.3, 0.3, 24);
+    mesh = new THREE.Mesh(geometry, upper_crane_material);
+    mesh.position.set(x + 11.25, y - 3 , z);
+    mesh.rotateZ(Math.PI * 0.4087);
+    obj.add(mesh);
+}
+
+
+function addBackRiser(obj, x, y, z) {
+    geometry = new THREE.CylinderGeometry(0.3, 0.3, 10.63);
+    mesh = new THREE.Mesh(geometry, upper_crane_material);
+    mesh.position.set(x - 4.5, y - 3, z);
+    mesh.rotateZ(-Math.PI * 0.294);
+    obj.add(mesh);
+}
+
 function createUpperCrane(obj, x, y, z) {
     'use strict';
 
@@ -348,6 +365,8 @@ function createUpperCrane(obj, x, y, z) {
     addCounterWeight(upperCrane, -6.75, -1.5, 0);
     addCraneHolder(upperCrane, 0, 1, 0);
     addCabin(upperCrane, 0, -3, 1.25);
+    addFrontRiser(upperCrane, 0, 7, 0);
+    addBackRiser(upperCrane, 0, 7, 0);
 
     createCart(upperCrane, 22.5, -1, 0);
 
