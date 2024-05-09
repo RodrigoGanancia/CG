@@ -51,7 +51,6 @@ function createScene(){
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x7195a3);
 
-    scene.add(new THREE.AxesHelper(10));
 
     // Create a texture loader
     var loader = new THREE.TextureLoader();
@@ -280,7 +279,6 @@ function createHook(obj, x, y, z) {
     hook = new THREE.Object3D();
     hook.userData = { rotSpeed: rotSpeedHook, rotating: false, moving: false};
     hook.position.set(x, y, z);
-    hook.add(new THREE.AxesHelper(10));
 
     addHookBlock(hook, 0, 0, 0);
     addHookClaw(hook, 0.7, 0, 0.7);
@@ -312,8 +310,6 @@ function createCable(obj, x, y, z) {
     cable.userData = { speed: cableSpeed, moving: false };
     cable.position.set(x, y, z);
 
-    cable.add(new THREE.AxesHelper(10));
-
     addCable(cable, 0, 0, 0);
 
     obj.add(cable)
@@ -324,7 +320,6 @@ function createCart(obj, x, y, z) {
 
     cart = new THREE.Object3D();
     cart.position.set(x, y - 0.5, z);
-    cart.add(new THREE.AxesHelper(10));
 
     cart.userData = { speed: cartSpeed, moving: false };
 
@@ -357,7 +352,6 @@ function createUpperCrane(obj, x, y, z) {
 
     upperCrane = new THREE.Object3D();
     upperCrane.position.set(x, y, z);
-    upperCrane.add(new THREE.AxesHelper(10));
 
     upperCrane.userData = { rotSpeed: rotSpeedCrane, rotating: false};
 
