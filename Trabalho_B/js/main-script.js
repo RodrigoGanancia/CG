@@ -815,5 +815,85 @@ function onKeyUp(e){
     }
 }
 
+window.addEventListener('keydown', function(event) {
+    var numberDisplay = document.getElementById('number-display');
+
+    if (!isNaN(event.key) && event.key >= 1 && event.key <= 6) {
+        numberDisplay.textContent = "Camera: " + event.key;
+        numberDisplay.style.color = 'rgb(249, 166, 118)';  
+
+        setTimeout(function() {
+            numberDisplay.style.color = 'rgb(53, 187, 125)';
+        }, 500);
+}
+    if (event.key === 'R' || event.key === 'r') {
+        var close_claw = document.getElementById('close-claw');
+        close_claw.style.color = 'rgb(249, 166, 118)'; 
+    }
+    if (event.key === 'F' || event.key === 'f') {
+        var open_claw = document.getElementById('open-claw');
+        open_claw.style.color = 'rgb(249, 166, 118)'; 
+    }
+    if (event.key === 'E' || event.key === 'e') {
+        var lineUp = document.getElementById('line-up');
+        lineUp.style.color = 'rgb(249, 166, 118)'; 
+    }
+    if (event.key === 'D' || event.key === 'd') {
+        var lineDown = document.getElementById('line-down');
+        lineDown.style.color = 'rgb(249, 166, 118)'; 
+    }
+    if (event.key === 'W' || event.key === 'w') {
+        var lineForward = document.getElementById('line-forward');
+        lineForward.style.color = 'rgb(249, 166, 118)'; 
+    }
+    if (event.key === 'S' || event.key === 's') {
+        var lineBackward = document.getElementById('line-backward');
+        lineBackward.style.color = 'rgb(249, 166, 118)'; 
+    }
+    if (event.key === 'Q' || event.key === 'q') {
+        var lineMovement = document.getElementById('line-movement-left');
+        lineMovement.style.color = 'rgb(249, 166, 118)'; 
+    }
+    if (event.key === 'A' || event.key === 'a') {
+        var lineMovement = document.getElementById('line-movement-right');
+        lineMovement.style.color = 'rgb(249, 166, 118)'; 
+    }
+});
+window.addEventListener('keyup', function(event) {
+    if (event.key === 'R' || event.key === 'r') {
+        var close_claw = document.getElementById('close-claw');
+        close_claw.style.color = 'rgb(53, 187, 125)'; 
+    }
+    if (event.key === 'F' || event.key === 'f') {
+        var open_claw = document.getElementById('open-claw');
+        open_claw.style.color = 'rgb(53, 187, 125)'; 
+    }
+    if (event.key === 'E' || event.key === 'e') {
+        var lineUp = document.getElementById('line-up');
+        lineUp.style.color = 'rgb(53, 187, 125)'; 
+    }
+    if (event.key === 'D' || event.key === 'd') {
+        var lineDown = document.getElementById('line-down');
+        lineDown.style.color = 'rgb(53, 187, 125)'; 
+    }
+    if (event.key === 'W' || event.key === 'w') {
+        var lineForward = document.getElementById('line-forward');
+        lineForward.style.color = 'rgb(53, 187, 125)'; 
+    }
+    if (event.key === 'S' || event.key === 's') {
+        var lineBackward = document.getElementById('line-backward');
+        lineBackward.style.color = 'rgb(53, 187, 125)'; 
+    }
+    if (event.key === 'Q' || event.key === 'q') {
+        var lineMovement = document.getElementById('line-movement-left');
+        lineMovement.style.color = 'rgb(53, 187, 125)'; 
+    }
+    if (event.key === 'A' || event.key === 'a') {
+        var lineMovement = document.getElementById('line-movement-right');
+        lineMovement.style.color = 'rgb(53, 187, 125)'; 
+    }
+
+});
+
 init();
 animate();
