@@ -18,6 +18,8 @@
     <div id="hud">
         <p>How to control the Crane:</p>
         <br>
+        <p id="close-claw">Close claw: R</p>
+        <p id="open-claw">Open claw : F</p>
         <p id="line-up">Move steel cable Up: E</p>
         <p id="line-down">Move steel cable Down: D</p>
         <p id="line-forward">Move cart forwards: W</p>
@@ -37,6 +39,14 @@
                     numberDisplay.style.color = 'rgba(122, 227, 225)';
                 }, 500);
     }
+            if (event.key === 'R' || event.key === 'r') {
+                var close_claw = document.getElementById('close-claw');
+                close_claw.style.color = 'yellow'; 
+            }
+            if (event.key === 'F' || event.key === 'f') {
+                var open_claw = document.getElementById('open-claw');
+                open_claw.style.color = 'yellow'; 
+            }
             if (event.key === 'E' || event.key === 'e') {
                 var lineUp = document.getElementById('line-up');
                 lineUp.style.color = 'yellow'; 
@@ -59,6 +69,14 @@
             }
         });
         window.addEventListener('keyup', function(event) {
+            if (event.key === 'R' || event.key === 'r') {
+                var close_claw = document.getElementById('close-claw');
+                close_claw.style.color = 'rgba(122, 227, 225)'; 
+            }
+            if (event.key === 'F' || event.key === 'f') {
+                var open_claw = document.getElementById('open-claw');
+                open_claw.style.color = 'rgba(122, 227, 225)'; 
+            }
             if (event.key === 'E' || event.key === 'e') {
                 var lineUp = document.getElementById('line-up');
                 lineUp.style.color = 'rgba(122, 227, 225)'; 
