@@ -515,13 +515,15 @@ function handleCollisions(){
     isInAnimation = true;
     upperCrane.userData.moving = true;
     upperCrane.userData.rotating = true;
+    cart.userData.moving = true;
+    cable.userData.moving = true;
     
     if(upperCrane.rotation.y > 0) {
         upperCrane.userData.rotSpeed = (upperCrane.rotation.y % (2*Math.PI)) > Math.PI ? rotSpeedCrane : -rotSpeedCrane;
     }  else {
         upperCrane.userData.rotSpeed = (upperCrane.rotation.y % (2*Math.PI)) > -Math.PI ? rotSpeedCrane : -rotSpeedCrane;
     }
-
+    cable.userData.speed = -cableSpeed;
     cart.userData.speed = cart.position.x < defaultCartX ? cartSpeed : -cartSpeed;
 }
 
@@ -578,21 +580,40 @@ function animate() {
     }
     delta = clock.getDelta();
     if (isInAnimation) {
-        console.log("rotation: ", Math.abs(upperCrane.rotation.y % (2*Math.PI)));
-        console.log("delta: ",  Math.abs(upperCrane.userData.rotSpeed * delta));
-        if(Math.abs(upperCrane.rotation.y % (2*Math.PI)) > Math.abs(upperCrane.userData.rotSpeed * delta)) {
-            upperCrane.rotation.y += upperCrane.userData.rotSpeed * delta;
+        if (cable.userData.moving && cable.scale.y > 1.90) {
+            // Decrease cable scale to avoid colliding with container wall
+            cable.scale.y += -cableSpeed *  delta;
+            hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
         } else {
-            upperCrane.userData.rotating = false;
+            if (cable.userData.moving && cable.scale.y > 1.5) {
+                cable.scale.y += -cableSpeed *  delta;
+                hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
+            } else {
+                cable.userData.moving = false;  
+            }
+            if(upperCrane.userData.rotating &&
+                Math.abs(upperCrane.rotation.y % (2*Math.PI)) > Math.abs(upperCrane.userData.rotSpeed * delta)) {
+                upperCrane.rotation.y += upperCrane.userData.rotSpeed * delta;
+            } else {
+                upperCrane.userData.rotating = false;
+            }
+            if (cart.userData.moving &&
+                Math.abs(cart.position.x + cart.userData.speed * delta - defaultCartX) < Math.abs(cart.position.x - defaultCartX)) {
+                cart.position.x += cart.userData.speed * delta;
+            } else {
+                cart.userData.moving = false;
+            }
+            if (!upperCrane.userData.rotating && !cart.userData.moving && !cable.userData.moving) {
+                if (cable.scale.y < 1.95) {
+                    cable.scale.y += cableSpeed *  delta;
+                    hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
+                } else {
+                    colisionLoad.parent.remove(colisionLoad);
+                    colisionLoad = null;
+                    isInAnimation = false;
+                }
+            }
         }
-        //console.log("first", Math.abs(cart.position.x + cart.userData.speed * delta - defaultCartX));
-        //console.log(Math.abs(cart.position.x - defaultCartX));
-        if (Math.abs(cart.position.x + cart.userData.speed * delta - defaultCartX) < Math.abs(cart.position.x - defaultCartX)) {
-            cart.position.x += cart.userData.speed * delta;
-        } else {
-            cart.userData.moving = false;
-        }
-        if (!upperCrane.userData.rotating && !cart.userData.moving) isInAnimation = false;
     }
     else {
         if (upperCrane.userData.rotating) {
@@ -749,7 +770,7 @@ function onKeyDown(e) {
          // 'P' and 'p'
         case 80:
         case 112:
-            console.log(claws[0].position.y);
+            console.log(cable.scale.y);
             break;
             
     }
