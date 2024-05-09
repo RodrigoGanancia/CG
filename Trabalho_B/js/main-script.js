@@ -557,9 +557,11 @@ function init() {
 
     createScene();
     createCameras();
-    createLight(0, 70, 70);
+
+    createLight(0, 70, 90);
+    createLight(0, 70, -90);
     clock = new THREE.Clock();
-    createLight(20, 50, 60);
+    
     render();
 
     window.addEventListener("keydown", onKeyDown);

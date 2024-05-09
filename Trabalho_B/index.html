@@ -24,7 +24,8 @@
         <p id="line-down">Move steel cable Down: D</p>
         <p id="line-forward">Move cart forwards: W</p>
         <p id="line-backward">Move cart backwards: S</p>
-        <p id="line-movement">Move crane boom: A/Q</p>
+        <p id="line-movement-left">Move crane boom left: Q</p>
+        <p id="line-movement-right">Move crane boom right: A</p>
     </div>
     <script type="module" src="js/main-script.js"></script>
     <script>
@@ -63,8 +64,12 @@
                 var lineBackward = document.getElementById('line-backward');
                 lineBackward.style.color = 'yellow'; 
             }
-            if (event.key === 'A' || event.key === 'a' || event.key === 'Q' || event.key === 'q') {
-                var lineMovement = document.getElementById('line-movement');
+            if (event.key === 'Q' || event.key === 'q') {
+                var lineMovement = document.getElementById('line-movement-left');
+                lineMovement.style.color = 'yellow'; 
+            }
+            if (event.key === 'A' || event.key === 'a') {
+                var lineMovement = document.getElementById('line-movement-right');
                 lineMovement.style.color = 'yellow'; 
             }
         });
@@ -93,10 +98,15 @@
                 var lineBackward = document.getElementById('line-backward');
                 lineBackward.style.color = 'rgba(122, 227, 225)'; 
             }
-            if (event.key === 'A' || event.key === 'a' || event.key === 'Q' || event.key === 'q') {
-                var lineMovement = document.getElementById('line-movement');
+            if (event.key === 'Q' || event.key === 'q') {
+                var lineMovement = document.getElementById('line-movement-left');
                 lineMovement.style.color = 'rgba(122, 227, 225)'; 
             }
+            if (event.key === 'A' || event.key === 'a') {
+                var lineMovement = document.getElementById('line-movement-right');
+                lineMovement.style.color = 'rgba(122, 227, 225)'; 
+            }
+
     });
     </script>
 </body>
