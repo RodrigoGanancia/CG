@@ -4,14 +4,14 @@ body {
     overflow: hidden;
 }
 .original-color {
-    color: rgb(53, 187, 125);
+    color: rgba(122, 227, 225);
 }
 
 #number-display {
     position: fixed;
     top: 0.5em;
-    color: rgb(53, 187, 125);
-    background: rgb(187, 53, 115);
+    color: rgba(122, 227, 225);
+    background: rgba(133, 28, 30);
     padding: 0.2em;
     border-radius: 0.2em;    
     left: 0.5em;
@@ -24,9 +24,9 @@ body {
     position: fixed;
     bottom: 1.8em;
     left: 2.5em;
-    color: rgb(53, 187, 125);
+    color: rgba(122, 227, 225);
     z-index: 1;
-    background: rgb(187, 53, 115);
+    background: rgba(133, 28, 30);
     padding: 1em;
     border-radius: 0.6em;
     font-family: Courier, sans-serif;

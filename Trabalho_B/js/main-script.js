@@ -683,6 +683,7 @@ function onResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    
 }
 
 ///////////////////////
@@ -833,77 +834,77 @@ window.addEventListener('keydown', function(event) {
 
     if (!isNaN(event.key) && event.key >= 1 && event.key <= 6) {
         numberDisplay.textContent = "Camera: " + event.key;
-        numberDisplay.style.color = 'rgb(249, 166, 118)';  
+        numberDisplay.style.color = 'yellow';  
 
         setTimeout(function() {
-            numberDisplay.style.color = 'rgb(53, 187, 125)';
+            numberDisplay.style.color = 'rgba(122, 227, 225)';
         }, 500);
 }
     if (event.key === 'R' || event.key === 'r') {
         var close_claw = document.getElementById('close-claw');
-        close_claw.style.color = 'rgb(249, 166, 118)'; 
+        close_claw.style.color = 'yellow'; 
     }
     if (event.key === 'F' || event.key === 'f') {
         var open_claw = document.getElementById('open-claw');
-        open_claw.style.color = 'rgb(249, 166, 118)'; 
+        open_claw.style.color = 'yellow'; 
     }
     if (event.key === 'E' || event.key === 'e') {
         var lineUp = document.getElementById('line-up');
-        lineUp.style.color = 'rgb(249, 166, 118)'; 
+        lineUp.style.color = 'yellow'; 
     }
     if (event.key === 'D' || event.key === 'd') {
         var lineDown = document.getElementById('line-down');
-        lineDown.style.color = 'rgb(249, 166, 118)'; 
+        lineDown.style.color = 'yellow'; 
     }
     if (event.key === 'W' || event.key === 'w') {
         var lineForward = document.getElementById('line-forward');
-        lineForward.style.color = 'rgb(249, 166, 118)'; 
+        lineForward.style.color = 'yellow'; 
     }
     if (event.key === 'S' || event.key === 's') {
         var lineBackward = document.getElementById('line-backward');
-        lineBackward.style.color = 'rgb(249, 166, 118)'; 
+        lineBackward.style.color = 'yellow'; 
     }
     if (event.key === 'Q' || event.key === 'q') {
         var lineMovement = document.getElementById('line-movement-left');
-        lineMovement.style.color = 'rgb(249, 166, 118)'; 
+        lineMovement.style.color = 'yellow'; 
     }
     if (event.key === 'A' || event.key === 'a') {
         var lineMovement = document.getElementById('line-movement-right');
-        lineMovement.style.color = 'rgb(249, 166, 118)'; 
+        lineMovement.style.color = 'yellow'; 
     }
 });
 window.addEventListener('keyup', function(event) {
     if (event.key === 'R' || event.key === 'r') {
         var close_claw = document.getElementById('close-claw');
-        close_claw.style.color = 'rgb(53, 187, 125)'; 
+        close_claw.style.color = 'rgba(122, 227, 225)'; 
     }
     if (event.key === 'F' || event.key === 'f') {
         var open_claw = document.getElementById('open-claw');
-        open_claw.style.color = 'rgb(53, 187, 125)'; 
+        open_claw.style.color = 'rgba(122, 227, 225)'; 
     }
     if (event.key === 'E' || event.key === 'e') {
         var lineUp = document.getElementById('line-up');
-        lineUp.style.color = 'rgb(53, 187, 125)'; 
+        lineUp.style.color = 'rgba(122, 227, 225)'; 
     }
     if (event.key === 'D' || event.key === 'd') {
         var lineDown = document.getElementById('line-down');
-        lineDown.style.color = 'rgb(53, 187, 125)'; 
+        lineDown.style.color = 'rgba(122, 227, 225)'; 
     }
     if (event.key === 'W' || event.key === 'w') {
         var lineForward = document.getElementById('line-forward');
-        lineForward.style.color = 'rgb(53, 187, 125)'; 
+        lineForward.style.color = 'rgba(122, 227, 225)'; 
     }
     if (event.key === 'S' || event.key === 's') {
         var lineBackward = document.getElementById('line-backward');
-        lineBackward.style.color = 'rgb(53, 187, 125)'; 
+        lineBackward.style.color = 'rgba(122, 227, 225)'; 
     }
     if (event.key === 'Q' || event.key === 'q') {
         var lineMovement = document.getElementById('line-movement-left');
-        lineMovement.style.color = 'rgb(53, 187, 125)'; 
+        lineMovement.style.color = 'rgba(122, 227, 225)'; 
     }
     if (event.key === 'A' || event.key === 'a') {
         var lineMovement = document.getElementById('line-movement-right');
-        lineMovement.style.color = 'rgb(53, 187, 125)'; 
+        lineMovement.style.color = 'rgba(122, 227, 225)'; 
     }
 
 });
