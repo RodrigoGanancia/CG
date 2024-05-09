@@ -8,13 +8,11 @@ import * as THREE from 'three';
 /* GLOBAL VARIABLES */
 //////////////////////
 var camera, scene, renderer, clock, delta;
-var material = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: true });
 var camera, scene, renderer;
-var material  = new THREE.MeshToonMaterial({ color: 0xd47bc6});
-var material2 = new THREE.MeshToonMaterial({ color: 0xACA6A5});
-var material3 = new THREE.MeshToonMaterial({ color: 0x0091a3});
-var material4 = new THREE.MeshToonMaterial({ color: 0xff4370});
-var material5 = new THREE.MeshToonMaterial({ color: 0x43c5ff});
+var load_material = new THREE.MeshToonMaterial({ color: 0x784210});
+var squares_material = new THREE.MeshToonMaterial({ color: 0x091a3});
+var upper_crane_material = new THREE.MeshToonMaterial({ color: 0xf5cb42});
+var tower_material = new THREE.MeshToonMaterial({ color: 0x43c5ff});
 
 var geometry, mesh;
 var cart, upperCrane, cable, hook;
@@ -22,7 +20,7 @@ var current_camera = "Perspective Camera";
 var cameras = {};
 var loads = [], claws = [];
 var colisionLoad;
-var isInAnimation = false, endAnimation;
+var isInAnimation = false;
 const n_loads = 6;
 const defaultCartX = 30;
 const maxHookClawY = -0.5;
@@ -203,7 +201,7 @@ function addBoom(obj, x, y, z) {
     'use strict'
 
     geometry = new THREE.BoxGeometry(57.5, 2.5, 2.5);
-    mesh = new THREE.Mesh(geometry, material4);
+    mesh = new THREE.Mesh(geometry, upper_crane_material);
     mesh.position.set(x + 16.5, y, z);
     obj.add(mesh);
 }
@@ -212,7 +210,7 @@ function addCounterWeight(obj, x, y, z) {
     'use strict'
 
     geometry = new THREE.BoxGeometry(3, 2, 3);
-    mesh = new THREE.Mesh(geometry, material3);
+    mesh = new THREE.Mesh(geometry, squares_material);
     mesh.position.set(x , y - 1, z);
     obj.add(mesh);
 }
@@ -221,7 +219,7 @@ function addBase(obj, x, y, z) {
     'use strict';
     
     geometry = new THREE.BoxGeometry(5, 3, 5);
-    mesh = new THREE.Mesh(geometry, material4);
+    mesh = new THREE.Mesh(geometry, upper_crane_material);
     mesh.position.set(x, y + 1.5, z);
     obj.add(mesh);
 }
@@ -230,7 +228,7 @@ function addTower(obj, x, y, z) {
     'use strict'
 
     geometry = new THREE.BoxGeometry(2.5, 45, 2.5);
-    mesh = new THREE.Mesh(geometry, material5);
+    mesh = new THREE.Mesh(geometry, tower_material);
     mesh.position.set(x, y + 22.5, z);
     obj.add(mesh);
 }
@@ -239,7 +237,7 @@ function addCraneHolder(obj, x, y, z) {
     'use strict'
 
     geometry = new THREE.CylinderGeometry(0, 1.768, 6, 4, 1);
-    mesh = new THREE.Mesh(geometry, material5);
+    mesh = new THREE.Mesh(geometry, tower_material);
     mesh.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
     mesh.position.set(x, y + 3, z);
     obj.add(mesh);
@@ -249,7 +247,7 @@ function addCabin(obj, x, y, z) {
     'use strict';
 
     geometry = new THREE.BoxGeometry(3, 3, 3);
-    mesh = new THREE.Mesh(geometry, material4);
+    mesh = new THREE.Mesh(geometry, upper_crane_material);
     mesh.position.set(x, y, z + 1.5);
     obj.add(mesh);
 }
@@ -258,7 +256,7 @@ function addHookClaw(obj, x, y, z) {
     'use strict';
 
     geometry = new THREE.CylinderGeometry(0.5, 0, 2, 4);
-    var claw = new THREE.Mesh(geometry, material3);
+    var claw = new THREE.Mesh(geometry, squares_material);
     //  claw.rotateY(Math.PI/4);
     claw.position.set(x, y - 0.5, z);
 
@@ -270,7 +268,7 @@ function addHookBlock(obj, x, y, z) {
     'use strict';
 
     geometry = new THREE.BoxGeometry(2, 1, 2);
-    mesh = new THREE.Mesh(geometry, material4);
+    mesh = new THREE.Mesh(geometry, upper_crane_material);
     mesh.position.set(x, y, z);
 
     obj.add(mesh);
@@ -295,14 +293,14 @@ function createHook(obj, x, y, z) {
 
 function addCart(obj, x, y, z) {
     geometry = new THREE.BoxGeometry(2.5, 1, 2.5);
-    mesh = new THREE.Mesh(geometry, material3);
+    mesh = new THREE.Mesh(geometry, squares_material);
     mesh.position.set(x, y - 0.5, z);
     obj.add(mesh);
 }
 
 function addCable(obj, x, y, z) {
     geometry = new THREE.CylinderGeometry(0.3, 0.3, cableHeight);
-    mesh = new THREE.Mesh(geometry, material4);
+    mesh = new THREE.Mesh(geometry, upper_crane_material);
     mesh.position.set(x, y - cableHeight/2, z);
     obj.add(mesh);
 }
@@ -375,7 +373,7 @@ function addContainerBase(obj, x, y, z) {
     'use strict'
 
     geometry = new THREE.BoxGeometry(containerLength, 1, containerDepth);
-    mesh = new THREE.Mesh(geometry, material4);
+    mesh = new THREE.Mesh(geometry, upper_crane_material);
     mesh.position.set(x, y + 0.5, z);
     obj.add(mesh);
 }
@@ -389,7 +387,7 @@ function addContainerWall(obj, x, y, z, len) {
     if (len == containerLength) {
         geometry = new THREE.BoxGeometry(len, containerHeight, 1);
     }
-    mesh = new THREE.Mesh(geometry, material3);
+    mesh = new THREE.Mesh(geometry, squares_material);
     mesh.position.set(x, y + containerHeight/2, z);
     obj.add(mesh);
 }
@@ -450,7 +448,7 @@ function createLoads() {
 
     for (var i = 0; i < n_loads; i++) {
         createLoadGeometry();
-        var load = new THREE.Mesh(geometry, material);
+        var load = new THREE.Mesh(geometry, load_material);
         const pos = generateRandomLocationLoad()
         load.position.set(pos.x, pos.y, pos.z);;
         loads.push(load);
@@ -705,11 +703,10 @@ function onKeyDown(e) {
             break;
         // '7' Switch tocalternate between wireframe and solid
         case 55:
-            material.wireframe = !material.wireframe;
-            material2.wireframe = !material2.wireframe;
-            material3.wireframe = !material3.wireframe;
-            material4.wireframe = !material4.wireframe;
-            material5.wireframe = !material5.wireframe;
+            load_material.wireframe = !load_material.wireframe;
+            squares_material.wireframe = !squares_material.wireframe;
+            upper_crane_material.wireframe = !upper_crane_material.wireframe;
+            tower_material.wireframe = !tower_material.wireframe;
             break;
         // 'a' and 'A'
         case 65:
