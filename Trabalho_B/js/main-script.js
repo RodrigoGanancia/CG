@@ -839,6 +839,10 @@ function onKeyUp(e){
 }
 
 window.addEventListener('keydown', function(event) {
+    if (isInAnimation) {
+        return;
+    }
+
     var numberDisplay = document.getElementById('number-display');
 
     if (!isNaN(event.key) && event.key >= 1 && event.key <= 6) {
@@ -883,6 +887,10 @@ window.addEventListener('keydown', function(event) {
     }
 });
 window.addEventListener('keyup', function(event) {
+    if (isInAnimation) {
+        return;
+    }
+
     if (event.key === 'R' || event.key === 'r') {
         var close_claw = document.getElementById('close-claw');
         close_claw.style.color = 'rgba(122, 227, 225)'; 
