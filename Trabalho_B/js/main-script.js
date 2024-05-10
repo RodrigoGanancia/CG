@@ -544,6 +544,45 @@ function handleCollisions(){
 function update(){
     'use strict';
 
+    if (upperCrane.userData.rotating) {
+        upperCrane.rotation.y += upperCrane.userData.rotSpeed * delta;
+    }
+    if (cart.userData.moving) {
+        if (cart.position.x >= 3.5 ) {
+            cart.position.x += cart.userData.speed * delta;
+        } else {
+            cart.position.x = 3.5;
+        }
+        if (cart.position.x <= 45.25) {
+            cart.position.x += cart.userData.speed * delta;
+        } else {
+            cart.position.x = 45.25;
+        }
+    }
+    if (cable.userData.moving) {
+        if (cable.scale.y >= 0) {
+            cable.scale.y += cable.userData.speed * delta;
+            hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
+        } else {
+            cable.scale.y = 0;
+        }
+        if (cable.scale.y <= 2.3) {
+            cable.scale.y += cable.userData.speed *  delta;
+            hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
+        } else {
+            cable.scale.y = 2.3;
+        }
+    }
+    if (hook.userData.rotating && ((hook.userData.rotSpeed > 0 && (claws[0].position.y > minHookClawY))
+        || (hook.userData.rotSpeed < 0 && (claws[0].position.y < maxHookClawY)))) {
+        var axisToRotate = new THREE.Vector3();
+        const pivotPoint = new THREE.Vector3(0,1,0); // middle of hook
+        for (var i = 0; i < 4; i++) {
+            axisToRotate.set(claws[i].position.z, 0, -claws[i].position.x); 
+            axisToRotate.normalize();
+            rotateAboutPoint(claws[i], pivotPoint, axisToRotate, hook.userData.rotSpeed * delta, false);
+        }
+    }
 }
 
 /////////////
@@ -591,32 +630,40 @@ function animate() {
     if(checkCollisions()) {
         handleCollisions();
     }
+
     delta = clock.getDelta();
+
     if (isInAnimation) {
         if (cable.userData.moving && cable.scale.y > 1.90) {
             // Decrease cable scale to avoid colliding with container wall
             cable.scale.y += -cableSpeed *  delta;
             hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
         } else {
+            // Cable already above container wall
             if (cable.userData.moving && cable.scale.y > 1.5) {
                 cable.scale.y += -cableSpeed *  delta;
                 hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
             } else {
+                // Cable is in initial position
                 cable.userData.moving = false;  
             }
             if(upperCrane.userData.rotating &&
                 Math.abs(upperCrane.rotation.y % (2*Math.PI)) > Math.abs(upperCrane.userData.rotSpeed * delta)) {
+                // Rotate upperCrane to initial position
                 upperCrane.rotation.y += upperCrane.userData.rotSpeed * delta;
             } else {
+                // UpperCrane is in initial position
                 upperCrane.userData.rotating = false;
             }
             if (cart.userData.moving &&
                 Math.abs(cart.position.x + cart.userData.speed * delta - defaultCartX) < Math.abs(cart.position.x - defaultCartX)) {
+                    //
                 cart.position.x += cart.userData.speed * delta;
             } else {
                 cart.userData.moving = false;
             }
             if (!upperCrane.userData.rotating && !cart.userData.moving && !cable.userData.moving) {
+                // 
                 if (cable.scale.y < 1.95) {
                     cable.scale.y += cableSpeed *  delta;
                     hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
@@ -629,45 +676,7 @@ function animate() {
         }
     }
     else {
-        if (upperCrane.userData.rotating) {
-            upperCrane.rotation.y += upperCrane.userData.rotSpeed * delta;
-        }
-        if (cart.userData.moving) {
-            if (cart.position.x >= 3.5 ) {
-                cart.position.x += cart.userData.speed * delta;
-            } else {
-                cart.position.x = 3.5;
-            }
-            if (cart.position.x <= 45.25) {
-                cart.position.x += cart.userData.speed * delta;
-            } else {
-                cart.position.x = 45.25;
-            }
-        }
-        if (cable.userData.moving) {
-            if (cable.scale.y >= 0) {
-                cable.scale.y += cable.userData.speed * delta;
-                hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
-            } else {
-                cable.scale.y = 0;
-            }
-            if (cable.scale.y <= 2.3) {
-                cable.scale.y += cable.userData.speed *  delta;
-                hook.position.y = -(cartHeight/2 + cable.scale.y * cableHeight);
-            } else {
-                cable.scale.y = 2.3;
-            }
-        }
-        if (hook.userData.rotating && ((hook.userData.rotSpeed > 0 && (claws[0].position.y > minHookClawY))
-            || (hook.userData.rotSpeed < 0 && (claws[0].position.y < maxHookClawY)))) {
-            var axisToRotate = new THREE.Vector3();
-            const pivotPoint = new THREE.Vector3(0,1,0); // middle of hook
-            for (var i = 0; i < 4; i++) {
-                axisToRotate.set(claws[i].position.z, 0, -claws[i].position.x); 
-                axisToRotate.normalize();
-                rotateAboutPoint(claws[i], pivotPoint, axisToRotate, hook.userData.rotSpeed * delta, false);
-            }
-        }
+        update();
     }
     render();
 
