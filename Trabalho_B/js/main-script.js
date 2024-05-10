@@ -1,8 +1,4 @@
 import * as THREE from 'three';
-// import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-// import { VRButton } from 'three/addons/webxr/VRButton.js';
-// import * as Stats from 'three/addons/libs/stats.module.js';
-// import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
 //////////////////////
 /* GLOBAL VARIABLES */
@@ -50,7 +46,6 @@ function createScene(){
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x7195a3);
-
 
     // Create a texture loader
     var loader = new THREE.TextureLoader();
@@ -140,7 +135,7 @@ function createOrthogonalCamera() {
     1000
 );
     camera.position.x = 20;
-    camera.position.z = 70; // esta linha está repetida
+    camera.position.y = 70;
     camera.position.z = 70;
     camera.lookAt(scene.position);
 
@@ -792,7 +787,6 @@ function onKeyDown(e) {
          // 'P' and 'p'
         case 80:
         case 112:
-            console.log(cable.scale.y);
             break;
             
     }
