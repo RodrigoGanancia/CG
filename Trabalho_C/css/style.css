@@ -3,3 +3,35 @@ body {
     background-color: #fff;
     overflow: hidden;
 }
+.original-color {
+    color: rgba(122, 227, 225);
+}
+
+#number-display {
+    position: fixed;
+    top: 0.5em;
+    color: rgba(122, 227, 225);
+    background: rgba(133, 28, 30);
+    padding: 0.2em;
+    border-radius: 0.2em;    
+    left: 0.5em;
+    font-size: 30px;
+    z-index: 1;
+    font-family: Courier, sans-serif;
+}
+
+#hud {
+    position: fixed;
+    bottom: 1.8em;
+    left: 2.5em;
+    color: rgba(122, 227, 225);
+    z-index: 1;
+    background: rgba(133, 28, 30);
+    padding: 1em;
+    border-radius: 0.6em;
+    font-family: Courier, sans-serif;
+}
+#hud p {
+    margin: 0;
+    padding: 0;
+}

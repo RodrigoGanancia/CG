@@ -4,7 +4,6 @@ import * as THREE from 'three';
 /* GLOBAL VARIABLES */
 //////////////////////
 var camera, scene, renderer, clock, delta;
-var camera, scene, renderer;
 var load_material = new THREE.MeshToonMaterial({ color: 0x784210});
 var squares_material = new THREE.MeshToonMaterial({ color: 0x091a3});
 var upper_crane_material = new THREE.MeshToonMaterial({ color: 0xf5cb42});
@@ -180,6 +179,7 @@ function createCameras() {
 /////////////////////
 /* CREATE LIGHT(S) */
 /////////////////////
+
 function createLight(x, y, z) {
     'use strict';
     var pointLight = new THREE.PointLight('0xfffff', 19000, 1000);
@@ -187,6 +187,7 @@ function createLight(x, y, z) {
     pointLight.position.set(x, y, z);
     scene.add(pointLight);
 }
+
 ////////////////////////
 /* CREATE OBJECT3D(S) */
 ////////////////////////
