@@ -21,7 +21,6 @@ const ringHeight = 2;
 const ringSpeed = 10;
 const carouselRotationSpeed = 0.2;
 
-
 /////////////////////
 /* CREATE SCENE(S) */
 /////////////////////
@@ -71,7 +70,6 @@ function createLight(x, y, z) {
 /* CREATE OBJECT3D(S) */
 ////////////////////////
 
-
 function addColumn(obj, x, y, z) {
   "use strict";
   geometry = new THREE.CylinderGeometry(1, 1, 20, 32);
@@ -85,9 +83,9 @@ function createRing(obj, x, y, z, innerRadius, outerRadius, startHeight) {
 
   const ring = new THREE.Object3D();
 
-  ring.userData = {moving: true, way: 1};
+  ring.userData = { moving: false, way: 1 };
 
-  ring.position.set(x, startHeight + ringHeight/2, z);
+  ring.position.set(x, startHeight + ringHeight / 2, z);
   addRing(ring, 0, 0, 0, innerRadius, outerRadius);
 
   obj.add(ring);
@@ -98,51 +96,52 @@ function createRing(obj, x, y, z, innerRadius, outerRadius, startHeight) {
 function addRing(obj, x, y, z, innerRadius, outerRadius) {
   "use strict";
 
-    // Create outer circle
-    const shape = new THREE.Shape();
-    shape.moveTo(outerRadius, 0);
-    shape.absarc(0, 0, outerRadius, 0, Math.PI * 2, false);
+  // Create outer circle
+  const shape = new THREE.Shape();
+  shape.moveTo(outerRadius, 0);
+  shape.absarc(0, 0, outerRadius, 0, Math.PI * 2, false);
 
-    // Create inner circle
-    const holePath = new THREE.Path();
-    holePath.moveTo(innerRadius, 0);
-    holePath.absarc(0, 0, innerRadius, 0, Math.PI * 2, true);
-    shape.holes.push(holePath);
+  // Create inner circle
+  const holePath = new THREE.Path();
+  holePath.moveTo(innerRadius, 0);
+  holePath.absarc(0, 0, innerRadius, 0, Math.PI * 2, true);
+  shape.holes.push(holePath);
 
-    // Extrude settings
-    const extrudeSettings = {
-        depth: 2,
-        bevelEnabled: false
-    };
+  // Extrude settings
+  const extrudeSettings = {
+    depth: 2,
+    bevelEnabled: false,
+  };
 
-    // Create extruded geometry
-    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-    mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x, y, z);
-    mesh.rotateX(Math.PI/2);
-    obj.add(mesh);
+  // Create extruded geometry
+  const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+  mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(x, y, z);
+  mesh.rotateX(Math.PI / 2);
+  obj.add(mesh);
 }
-
 
 function createCarousel(x, y, z) {
   "use strict";
 
   carousel = new THREE.Object3D();
 
-  addColumn(carousel, 0, collumnHeight/2, 0);
-  innerRing = createRing(carousel, 0, 0, 0, 1, 4, 2 * ringHeight);
-  middleRing = createRing(carousel, 0, 0, 0, 4, 7, ringHeight);
-  outerRing = createRing(carousel, 0, 0, 0, 7, 10, 0);
+  addColumn(carousel, 0, collumnHeight / 2, 0);
+  innerRing = createRing(carousel, x, y, z, 1, 4, 2 * ringHeight);
+  middleRing = createRing(carousel, x, y, z, 4, 7, ringHeight);
+  outerRing = createRing(carousel, x, y, z, 7, 10, 0);
 
   scene.add(carousel);
 }
 
 function addSkydome(x, y, z) {
-
-  const texture = new THREE.TextureLoader().load('./img/background.png');
+  const texture = new THREE.TextureLoader().load("./img/background.png");
 
   geometry = new THREE.SphereGeometry(45, 32, 32);
-  material = new THREE.MeshBasicMaterial({ side: THREE.BackSide, map: texture });
+  material = new THREE.MeshBasicMaterial({
+    side: THREE.BackSide,
+    map: texture,
+  });
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
 
@@ -151,10 +150,13 @@ function addSkydome(x, y, z) {
 
 function addFloor(x, y, z) {
   geometry = new THREE.PlaneGeometry(100, 100); // width, height
-  material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+  material = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide,
+  });
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
-  mesh.rotateX(Math.PI/2);
+  mesh.rotateX(Math.PI / 2);
 
   scene.add(mesh);
 }
@@ -198,8 +200,8 @@ function tryMovingRing(ring) {
   if (ring.userData.moving) {
     if (ring.userData.way == 1) {
       if (ring.position.y > collumnHeight) {
-      ring.position.y = collumnHeight;
-      ring.userData.way = -ring.userData.way;
+        ring.position.y = collumnHeight;
+        ring.userData.way = -ring.userData.way;
       } else {
         ring.position.y += delta * ringSpeed * ring.userData.way;
       }
@@ -208,7 +210,7 @@ function tryMovingRing(ring) {
         ring.position.y = ringHeight;
         ring.userData.way = -ring.userData.way;
       } else {
-        ring.position.y += delta* ringSpeed * ring.userData.way;
+        ring.position.y += delta * ringSpeed * ring.userData.way;
       }
     }
   }
@@ -279,25 +281,20 @@ function onResize() {
 function onKeyDown(e) {
   "use strict";
 
-  switch(e.key) {
+  switch (e.key) {
     // Move Inner Ring
-    case '1':
-      console.log("toggleInnerRing");
-      toggleRing(innerRing);
+    case "1":
+      innerRing.userData.moving = true;
       break;
     // Move Middle Ring
-    case '2':
-      toggleRing(middleRing);
+    case "2":
+      middleRing.userData.moving = true;
       break;
     // Move Outer Ring
-    case '3':
-      toggleRing(outerRing);
+    case "3":
+      outerRing.userData.moving = true;
       break;
   }
-}
-
-function toggleRing(ring) {
-  ring.userData.moving = !ring.userData.moving;
 }
 
 ///////////////////////
@@ -306,6 +303,20 @@ function toggleRing(ring) {
 function onKeyUp(e) {
   "use strict";
 
+  switch (e.key) {
+    // Move Inner Ring
+    case "1":
+      innerRing.userData.moving = false;
+      break;
+    // Move Middle Ring
+    case "2":
+      middleRing.userData.moving = false;
+      break;
+    // Move Outer Ring
+    case "3":
+      outerRing.userData.moving = false;
+      break;
+  }
 }
 
 init();
