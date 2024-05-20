@@ -12,12 +12,14 @@ import { ParametricGeometry } from "three/addons/geometries/ParametricGeometry.j
 var camera, scene, renderer, delta, clock;
 var carousel, innerRing, middleRing, outerRing;
 var geometry, mesh;
-var material;
 
 const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 }); // Red
 const phongMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00, shininess: 100 }); // Green
 const toonMaterial = new THREE.MeshToonMaterial({ color: 0x0000ff }); // Blue
 const normalMaterial = new THREE.MeshNormalMaterial();
+const basicMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+
+var material = basicMaterial;
 
 const collumnHeight = 20;
 const ringHeight = 2;
@@ -35,7 +37,6 @@ function createScene() {
   scene.background = new THREE.Color(0x7195a3);
 
   addSkydome(0, 0, 0);
-  material = normalMaterial;
   createCarousel(0, 0, 0);
   addFloor(0, 0, 0);
 }
@@ -220,11 +221,11 @@ function addSkydome(x, y, z) {
   const texture = new THREE.TextureLoader().load('./img/background.png');
 
   geometry = new THREE.SphereGeometry(45, 32, 32);
-  material = new THREE.MeshBasicMaterial({
+  const mat = new THREE.MeshBasicMaterial({
     side: THREE.BackSide,
     map: texture,
   });
-  mesh = new THREE.Mesh(geometry, material);
+  mesh = new THREE.Mesh(geometry, mat);
   mesh.position.set(x, y, z);
 
   scene.add(mesh);
@@ -376,7 +377,35 @@ function onKeyDown(e) {
     case "3":
       outerRing.userData.moving = true;
       break;
+    case "q":
+    case "Q":
+      setMaterial(lambertMaterial);
+      break;
+    case "w":
+    case "W":
+      setMaterial(phongMaterial);
+      break;
+    case "e":
+    case "E":
+      setMaterial(toonMaterial);
+      break;
+    case "r":
+    case "R":
+      setMaterial(normalMaterial);
+      break;
+    case "t":
+    case "T":
+      setMaterial(basicMaterial);
+      break;
   }
+}
+
+function setMaterial(newMaterial) {
+  carousel.traverse(function (node) {
+    if (node instanceof THREE.Mesh) {
+      node.material = newMaterial;
+    }
+  });
 }
 
 ///////////////////////
