@@ -3,6 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { VRButton } from "three/addons/webxr/VRButton.js";
 import * as Stats from "three/addons/libs/stats.module.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
+import { ParametricGeometry } from "three/addons/geometries/ParametricGeometry.js";
 
 //////////////////////
 /* GLOBAL VARIABLES */
@@ -11,10 +12,12 @@ import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 var camera, scene, renderer, delta, clock;
 var carousel, innerRing, middleRing, outerRing;
 var geometry, mesh;
-var material = new THREE.MeshBasicMaterial({
-  color: 0x00ff00,
-  wireframe: true,
-});
+var material;
+
+const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 }); // Red
+const phongMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00, shininess: 100 }); // Green
+const toonMaterial = new THREE.MeshToonMaterial({ color: 0x0000ff }); // Blue
+const normalMaterial = new THREE.MeshNormalMaterial();
 
 const collumnHeight = 20;
 const ringHeight = 2;
@@ -31,8 +34,9 @@ function createScene() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x7195a3);
 
-  createCarousel(0, 0, 0);
   addSkydome(0, 0, 0);
+  material = normalMaterial;
+  createCarousel(0, 0, 0);
   addFloor(0, 0, 0);
 }
 
@@ -41,6 +45,8 @@ function createScene() {
 //////////////////////
 
 function createCamera(x, y, z, lookPosition) {
+  "use strict";
+
   camera = new THREE.PerspectiveCamera(
     70,
     window.innerWidth / window.innerHeight,
@@ -78,6 +84,80 @@ function addColumn(obj, x, y, z) {
   obj.add(mesh);
 }
 
+var paramFunction1 = function (u, v) {
+  var u = (u * 2 * Math.PI) - Math.PI;
+  var v = (v * 2 * Math.PI) - Math.PI;
+
+  var x = Math.sin(u) * Math.sin(v) + 0.05 * Math.cos(20 * v);
+  var y = Math.cos(u) * Math.sin(v) + 0.05 * Math.cos(20 * u);
+  var z = Math.cos(v);
+
+
+  return new THREE.Vector3(x, y, z);
+}
+
+var paramFunction2 = function (u, v) {
+  var u = u * 2 * Math.PI;
+  var v = (v * 2 * Math.PI) - Math.PI;
+
+  var x = Math.cos(u);
+  var y = Math.sin(u) + Math.cos(v);
+  var z = Math.sin(v);
+
+
+  return new THREE.Vector3(x, y, z);
+}
+
+var paramFunction3 = function (u, v) {
+  var u = u * 2;
+  var v = (v * 4 * Math.PI);
+
+  var x = Math.cos(v) * Math.sin(u);
+  var y = Math.sin(v) * Math.sin(u);
+  var z = 0.2 * v + (Math.cos(u) + Math.log(Math.tan(u / 2)));
+
+
+  return new THREE.Vector3(x, y, z);
+}
+
+var paramFunction4 = function (u, v) {
+  var a = 3;
+  var n = 3;
+  var m = 1;
+
+  var u = u * 4 * Math.PI;
+  var v = v * 2 * Math.PI;
+
+  var x = (a + Math.cos(n * u / 2.0) * Math.sin(v) - Math.sin(n * u / 2.0) * Math.sin(2 * v)) * Math.cos(m * u / 2.0);
+  var y = (a + Math.cos(n * u / 2.0) * Math.sin(v) - Math.sin(n * u / 2.0) * Math.sin(2 * v)) * Math.sin(m * u / 2.0);
+  var z = Math.sin(n * u / 2.0) * Math.sin(v) + Math.cos(n * u / 2.0) * Math.sin(2 * v);
+
+  return new THREE.Vector3(x, y, z);
+}
+
+var paramFunction5 = function (u, v) {
+
+  var u = u * Math.PI * 2;
+  var v = v * 8 * Math.PI;
+
+  var x = Math.pow(1.2, v) * Math.pow((Math.sin(u)), 0.5) * Math.sin(v);
+  var y = v * Math.sin(u) * Math.cos(u);
+  var z = Math.pow(1.2, v) * Math.pow((Math.sin(u)), 0.3) * Math.cos(v);
+
+  return new THREE.Vector3(x, y, z);
+}
+
+function addParametricShape(obj, x, y, z, ParametricFunc) {
+  "use strict";
+
+  //geometry = new THREE.ParametricGeometry(ParametricFunc);
+  //material = new THREE.MeshPhongMaterial({color: 0xcc3333a, side: THREE.DoubleSide, shading: THREE.FlatShading});
+  mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(x, y, z);
+
+  obj.add(mesh);
+}
+
 function createRing(obj, x, y, z, innerRadius, outerRadius, startHeight) {
   "use strict";
 
@@ -107,17 +187,15 @@ function addRing(obj, x, y, z, innerRadius, outerRadius) {
   holePath.absarc(0, 0, innerRadius, 0, Math.PI * 2, true);
   shape.holes.push(holePath);
 
-  // Extrude settings
   const extrudeSettings = {
-    depth: 2,
-    bevelEnabled: false,
+      depth: 2,
+      bevelEnabled: false
   };
 
-  // Create extruded geometry
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
-  mesh.rotateX(Math.PI / 2);
+  mesh.rotateX(Math.PI/2);
   obj.add(mesh);
 }
 
@@ -131,11 +209,15 @@ function createCarousel(x, y, z) {
   middleRing = createRing(carousel, x, y, z, 4, 7, ringHeight);
   outerRing = createRing(carousel, x, y, z, 7, 10, 0);
 
+  addParametricShape(carousel, 0, 0, 0, paramFunction1);
+
   scene.add(carousel);
 }
 
 function addSkydome(x, y, z) {
-  const texture = new THREE.TextureLoader().load("./img/background.png");
+  "use strict";
+
+  const texture = new THREE.TextureLoader().load('./img/background.png');
 
   geometry = new THREE.SphereGeometry(45, 32, 32);
   material = new THREE.MeshBasicMaterial({
