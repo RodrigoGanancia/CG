@@ -8,13 +8,17 @@ import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 /* GLOBAL VARIABLES */
 //////////////////////
 
-var camera, scene, renderer;
-var column, innerRing;
+var camera, scene, renderer, delta, clock;
+var column, innerRing, middleRing, outerRing;
 var geometry, mesh;
 var material = new THREE.MeshBasicMaterial({
   color: 0x00ff00,
   wireframe: true,
 });
+
+const collumnHeight = 20;
+const ringSpeed = 10;
+
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -33,7 +37,7 @@ function createScene() {
 /* CREATE CAMERA(S) */
 //////////////////////
 
-function createCamera(x, y, z) {
+function createCamera(x, y, z, lookPosition) {
   camera = new THREE.PerspectiveCamera(
     70,
     window.innerWidth / window.innerHeight,
@@ -43,7 +47,8 @@ function createCamera(x, y, z) {
   camera.position.x = x;
   camera.position.y = y;
   camera.position.z = z;
-  camera.lookAt(scene.position);
+
+  camera.lookAt(lookPosition);
 }
 
 /////////////////////
@@ -62,54 +67,68 @@ function createLight(x, y, z) {
 /* CREATE OBJECT3D(S) */
 ////////////////////////
 
-function createColumn(obj, x, y, z) {
-  "use strict";
-
-  column = new THREE.Object3D();
-
-  column.position.set(x, y, z);
-  addColumn(column, x, y, z);
-
-  obj.add(column);
-}
 
 function addColumn(obj, x, y, z) {
   "use strict";
-  geometry = new THREE.CylinderGeometry(5, 5, 100, 32);
+  geometry = new THREE.CylinderGeometry(1, 1, 20, 32);
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
   obj.add(mesh);
 }
 
-function createInnerRing(obj, x, y, z) {
+function createRing(obj, x, y, z, innerRadius, outerRadius, startHeight) {
   "use strict";
 
-  innerRing = new THREE.Object3D();
+  const ring = new THREE.Object3D();
 
-  innerRing.position.set(x, y, z);
-  addInnerRing(innerRing, x, y, z);
+  ring.userData = {moving: true, way: 1};
 
-  obj.add(innerRing);
+  ring.position.set(x, startHeight, z);
+  addRing(ring, 0, 0, 0, innerRadius, outerRadius);
+
+  obj.add(ring);
+
+  return ring;
 }
 
-function addInnerRing(obj, x, y, z) {
+function addRing(obj, x, y, z, innerRadius, outerRadius) {
   "use strict";
-  geometry = new THREE.CylinderGeometry(10, 10, 20, );
-  mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(x, y, z);
-  obj.add(mesh);
+
+    // Create outer circle
+    const shape = new THREE.Shape();
+    shape.moveTo(outerRadius, 0);
+    shape.absarc(0, 0, outerRadius, 0, Math.PI * 2, false);
+
+    // Create inner circle
+    const holePath = new THREE.Path();
+    holePath.moveTo(innerRadius, 0);
+    holePath.absarc(0, 0, innerRadius, 0, Math.PI * 2, true);
+    shape.holes.push(holePath);
+
+    // Extrude settings
+    const extrudeSettings = {
+        depth: 2,
+        bevelEnabled: false
+    };
+
+    // Create extruded geometry
+    const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y, z);
+    mesh.rotateX(Math.PI/2);
+    obj.add(mesh);
 }
+
 
 function createCarousel(x, y, z) {
   "use strict";
 
   var carousel = new THREE.Object3D();
 
-  createColumn(carousel, x, y, z);
-  createInnerRing(carousel, x, y, z);
-  //createMiddleRing(carousel, x, y, z);
-  //createOuterRing(carousel, x, y, z);
-  //createMiddleRing(carousel, x, y, z);
+  addColumn(carousel, 0, collumnHeight/2, 0);
+  innerRing = createRing(carousel, 0, 0, 0, 1, 4, 7);
+  middleRing = createRing(carousel, 0, 0, 0, 4, 7, 5);
+  outerRing = createRing(carousel, 0, 0, 0, 7, 10, 3);
 
   scene.add(carousel);
 }
@@ -136,6 +155,32 @@ function handleCollisions() {
 
 function update() {
   "use strict";
+
+  delta = clock.getDelta();
+
+  tryMovingRing(innerRing);
+  tryMovingRing(middleRing);
+  tryMovingRing(outerRing);
+}
+
+function tryMovingRing(ring) {
+  if (ring.userData.moving) {
+    if (ring.userData.way == 1) {
+      if (ring.position.y > collumnHeight) {
+      ring.position.y = collumnHeight;
+      ring.userData.way = -ring.userData.way;
+      } else {
+        ring.position.y += delta * ringSpeed * ring.userData.way;
+      }
+    } else {
+      if (ring.position.y < 0) {
+        ring.position.y = 0;
+        ring.userData.way = -ring.userData.way;
+      } else {
+        ring.position.y += delta* ringSpeed * ring.userData.way;
+      }
+    }
+  }
 }
 
 /////////////
@@ -162,10 +207,14 @@ function init() {
   document.body.appendChild(renderer.domElement);
 
   createScene();
-  createCamera(20, 70, 70);
 
-  render();
+  clock = new THREE.Clock();
+
+  createCamera(30, 20, 0, new THREE.Vector3(0, 10, 0));
+
   window.addEventListener("resize", onResize, false);
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keyup", onKeyUp);
 }
 
 /////////////////////
@@ -173,6 +222,12 @@ function init() {
 /////////////////////
 function animate() {
   "use strict";
+
+  update();
+
+  render();
+
+  requestAnimationFrame(animate);
 }
 
 ////////////////////////////
@@ -192,6 +247,26 @@ function onResize() {
 ///////////////////////
 function onKeyDown(e) {
   "use strict";
+
+  switch(e.key) {
+    // Move Inner Ring
+    case '1':
+      console.log("toggleInnerRing");
+      toggleRing(innerRing);
+      break;
+    // Move Middle Ring
+    case '2':
+      toggleRing(middleRing);
+      break;
+    // Move Outer Ring
+    case '3':
+      toggleRing(outerRing);
+      break;
+  }
+}
+
+function toggleRing(ring) {
+  ring.userData.moving = !ring.userData.moving;
 }
 
 ///////////////////////
@@ -199,8 +274,8 @@ function onKeyDown(e) {
 ///////////////////////
 function onKeyUp(e) {
   "use strict";
+
 }
 
 init();
 animate();
-
