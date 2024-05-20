@@ -9,7 +9,7 @@ import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 //////////////////////
 
 var camera, scene, renderer, delta, clock;
-var column, innerRing, middleRing, outerRing;
+var carousel, innerRing, middleRing, outerRing;
 var geometry, mesh;
 var material = new THREE.MeshBasicMaterial({
   color: 0x00ff00,
@@ -18,6 +18,7 @@ var material = new THREE.MeshBasicMaterial({
 
 const collumnHeight = 20;
 const ringSpeed = 10;
+const carouselRotationSpeed = 0.2;
 
 
 /////////////////////
@@ -123,7 +124,7 @@ function addRing(obj, x, y, z, innerRadius, outerRadius) {
 function createCarousel(x, y, z) {
   "use strict";
 
-  var carousel = new THREE.Object3D();
+  carousel = new THREE.Object3D();
 
   addColumn(carousel, 0, collumnHeight/2, 0);
   innerRing = createRing(carousel, 0, 0, 0, 1, 4, 7);
@@ -161,6 +162,11 @@ function update() {
   tryMovingRing(innerRing);
   tryMovingRing(middleRing);
   tryMovingRing(outerRing);
+  rotateCarousel();
+}
+
+function rotateCarousel() {
+  carousel.rotateY(delta * carouselRotationSpeed);
 }
 
 function tryMovingRing(ring) {
