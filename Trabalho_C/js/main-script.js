@@ -17,6 +17,7 @@ var material = new THREE.MeshBasicMaterial({
 });
 
 const collumnHeight = 20;
+const ringHeight = 2;
 const ringSpeed = 10;
 const carouselRotationSpeed = 0.2;
 
@@ -32,6 +33,8 @@ function createScene() {
   scene.background = new THREE.Color(0x7195a3);
 
   createCarousel(0, 0, 0);
+  addSkydome(0, 0, 0);
+  addFloor(0, 0, 0);
 }
 
 //////////////////////
@@ -84,7 +87,7 @@ function createRing(obj, x, y, z, innerRadius, outerRadius, startHeight) {
 
   ring.userData = {moving: true, way: 1};
 
-  ring.position.set(x, startHeight, z);
+  ring.position.set(x, startHeight + ringHeight/2, z);
   addRing(ring, 0, 0, 0, innerRadius, outerRadius);
 
   obj.add(ring);
@@ -127,11 +130,33 @@ function createCarousel(x, y, z) {
   carousel = new THREE.Object3D();
 
   addColumn(carousel, 0, collumnHeight/2, 0);
-  innerRing = createRing(carousel, 0, 0, 0, 1, 4, 7);
-  middleRing = createRing(carousel, 0, 0, 0, 4, 7, 5);
-  outerRing = createRing(carousel, 0, 0, 0, 7, 10, 3);
+  innerRing = createRing(carousel, 0, 0, 0, 1, 4, 2 * ringHeight);
+  middleRing = createRing(carousel, 0, 0, 0, 4, 7, ringHeight);
+  outerRing = createRing(carousel, 0, 0, 0, 7, 10, 0);
 
   scene.add(carousel);
+}
+
+function addSkydome(x, y, z) {
+
+  const texture = new THREE.TextureLoader().load('./img/background.png');
+
+  geometry = new THREE.SphereGeometry(45, 32, 32);
+  material = new THREE.MeshBasicMaterial({ side: THREE.BackSide, map: texture });
+  mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(x, y, z);
+
+  scene.add(mesh);
+}
+
+function addFloor(x, y, z) {
+  geometry = new THREE.PlaneGeometry(100, 100); // width, height
+  material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+  mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(x, y, z);
+  mesh.rotateX(Math.PI/2);
+
+  scene.add(mesh);
 }
 
 //////////////////////
@@ -179,8 +204,8 @@ function tryMovingRing(ring) {
         ring.position.y += delta * ringSpeed * ring.userData.way;
       }
     } else {
-      if (ring.position.y < 0) {
-        ring.position.y = 0;
+      if (ring.position.y < ringHeight) {
+        ring.position.y = ringHeight;
         ring.userData.way = -ring.userData.way;
       } else {
         ring.position.y += delta* ringSpeed * ring.userData.way;
@@ -216,7 +241,7 @@ function init() {
 
   clock = new THREE.Clock();
 
-  createCamera(30, 20, 0, new THREE.Vector3(0, 10, 0));
+  createCamera(30, 20, 5, new THREE.Vector3(0, 10, 0));
 
   window.addEventListener("resize", onResize, false);
   window.addEventListener("keydown", onKeyDown);
