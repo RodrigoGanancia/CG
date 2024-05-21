@@ -37,7 +37,7 @@ function createScene() {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x7195a3);
 
-  addSkydome(0, 0, 0);
+  addSkydome();
   createCarousel(0, 0, 0);
   addFloor(0, 0, 0);
 }
@@ -170,10 +170,10 @@ function createRing(obj, x, y, z, innerRadius, outerRadius, startHeight) {
 
   const ring = new THREE.Object3D();
 
-  ring.userData = { moving: false, way: 1 };
+  ring.userData = { moving: true, way: 1 };
 
   ring.position.set(x, startHeight + ringHeight / 2, z);
-  addRing(ring, 0, 0, 0, innerRadius, outerRadius);
+  addRing(ring, x, y, z, innerRadius, outerRadius);
 
   obj.add(ring);
 
@@ -221,7 +221,7 @@ function createCarousel(x, y, z) {
   scene.add(carousel);
 }
 
-function addSkydome(x, y, z) {
+function addSkydome() {
   "use strict";
 
   var texture = new THREE.TextureLoader().load('./img/background.png');
@@ -381,15 +381,15 @@ function onKeyDown(e) {
   switch (e.key) {
     // Move Inner Ring
     case "1":
-      innerRing.userData.moving = true;
+      toggleRing(innerRing);
       break;
     // Move Middle Ring
     case "2":
-      middleRing.userData.moving = true;
+      toggleRing(middleRing);
       break;
     // Move Outer Ring
     case "3":
-      outerRing.userData.moving = true;
+      toggleRing(outerRing);
       break;
     case "q":
     case "Q":
@@ -418,6 +418,10 @@ function onKeyDown(e) {
   }
 }
 
+function toggleRing(ring) {
+  ring.userData.moving = !ring.userData.moving;
+}
+
 function setMaterial(newMaterial) {
   carousel.traverse(function (node) {
     if (node instanceof THREE.Mesh) {
@@ -431,21 +435,6 @@ function setMaterial(newMaterial) {
 ///////////////////////
 function onKeyUp(e) {
   "use strict";
-
-  switch (e.key) {
-    // Move Inner Ring
-    case "1":
-      innerRing.userData.moving = false;
-      break;
-    // Move Middle Ring
-    case "2":
-      middleRing.userData.moving = false;
-      break;
-    // Move Outer Ring
-    case "3":
-      outerRing.userData.moving = false;
-      break;
-  }
 }
 
 init();
