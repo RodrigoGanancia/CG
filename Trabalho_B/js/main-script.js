@@ -355,9 +355,6 @@ function createUpperCrane(obj, x, y, z) {
     addCounterWeight(upperCrane, -6.75, -1.5, 0);
     addCraneHolder(upperCrane, 0, 1, 0);
     addCabin(upperCrane, 0, -3, 1.25);
-    addFrontRiser(upperCrane, 0, 7, 0);
-    addBackRiser(upperCrane, 0, 7, 0);
-
     createCart(upperCrane, 22.5, -1, 0);
 
     obj.add(upperCrane);
@@ -371,6 +368,9 @@ function createCrane(x, y, z) {
     addBase(crane, 0, 0, 0);
     addTower(crane, 0, 3, 0);
     createUpperCrane(crane, 0, 49.5, 0);
+    addFrontRiser(crane, 0, 55.5, 0);
+    addBackRiser(crane, 0, 55.5, 0);
+
 
     crane.position.set(x, y, z);
 

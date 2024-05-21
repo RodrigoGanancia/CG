@@ -9,15 +9,16 @@ import { ParametricGeometry } from "three/addons/geometries/ParametricGeometry.j
 /* GLOBAL VARIABLES */
 //////////////////////
 
-var camera, scene, renderer, delta, clock;
+var camera, scene, renderer, delta, clock, pointLight;
 var carousel, innerRing, middleRing, outerRing;
 var geometry, mesh;
+const ambientLight = new THREE.AmbientLight(0xFFA500); // soft white light
 
-const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 }); // Red
+const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff }); // Red
 const phongMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00, shininess: 100 }); // Green
 const toonMaterial = new THREE.MeshToonMaterial({ color: 0x0000ff }); // Blue
 const normalMaterial = new THREE.MeshNormalMaterial();
-const basicMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const basicMaterial = new THREE.MeshBasicMaterial({ color: 0xA4f12D });
 
 var material = basicMaterial;
 
@@ -67,11 +68,16 @@ function createCamera(x, y, z, lookPosition) {
 
 function createLight(x, y, z) {
   "use strict";
-  var pointLight = new THREE.PointLight("0xfffff", 19000, 1000);
 
+  pointLight = new THREE.PointLight("0xfffff", 19000, 1000);
   pointLight.position.set(x, y, z);
   scene.add(pointLight);
 }
+
+function createAmbientLight() {
+  scene.add(ambientLight);
+}
+
 
 ////////////////////////
 /* CREATE OBJECT3D(S) */
@@ -218,23 +224,22 @@ function createCarousel(x, y, z) {
 function addSkydome(x, y, z) {
   "use strict";
 
-  const texture = new THREE.TextureLoader().load('./img/background.png');
+  var texture = new THREE.TextureLoader().load('./img/background.png');
 
-  geometry = new THREE.SphereGeometry(45, 32, 32);
-  const mat = new THREE.MeshBasicMaterial({
-    side: THREE.BackSide,
-    map: texture,
-  });
-  mesh = new THREE.Mesh(geometry, mat);
-  mesh.position.set(x, y, z);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(5, 5); 
+  var skyMaterial = new THREE.MeshBasicMaterial({ map: texture });
+  var skyGeometry = new THREE.SphereGeometry(40, 40, 40);
 
-  scene.add(mesh);
+  var sky = new THREE.Mesh(skyGeometry, skyMaterial);
+  sky.material.side = THREE.BackSide; 
+  scene.add(sky);
 }
 
 function addFloor(x, y, z) {
   geometry = new THREE.PlaneGeometry(100, 100); // width, height
-  material = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
+  material = new THREE.MeshLambertMaterial({
+    color: 0x550000,
     side: THREE.DoubleSide,
   });
   mesh = new THREE.Mesh(geometry, material);
@@ -320,6 +325,10 @@ function init() {
     antialias: true,
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.xr.enabled = true;
+
+  document.body.appendChild(VRButton.createButton(renderer));
+  
   document.body.appendChild(renderer.domElement);
 
   createScene();
@@ -327,6 +336,9 @@ function init() {
   clock = new THREE.Clock();
 
   createCamera(30, 20, 5, new THREE.Vector3(0, 10, 0));
+  createLight(10, 20, 0);
+  createAmbientLight();
+
 
   window.addEventListener("resize", onResize, false);
   window.addEventListener("keydown", onKeyDown);
@@ -341,9 +353,11 @@ function animate() {
 
   update();
 
-  render();
+  renderer.setAnimationLoop(function() {
+    update(); 
+    render();
+});
 
-  requestAnimationFrame(animate);
 }
 
 ////////////////////////////
@@ -396,6 +410,10 @@ function onKeyDown(e) {
     case "t":
     case "T":
       setMaterial(basicMaterial);
+      break;
+    case "d":
+    case "D":
+      pointLight.visible = !pointLight.visible;
       break;
   }
 }
