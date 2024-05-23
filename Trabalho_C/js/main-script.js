@@ -14,6 +14,7 @@ var carousel, innerRing, middleRing, outerRing;
 var geometry, mesh;
 
 var spotlights = [];
+var parametricShapes = [];
 
 var parametricFunctions = [
   parametricFunction1,
@@ -198,6 +199,7 @@ function addParametricShape(obj, x, y, z, ParametricFunc) {
   });
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
+  parametricShapes.push(mesh);
 
   obj.add(mesh);
 }
@@ -357,10 +359,19 @@ function update() {
   tryMovingRing(middleRing);
   tryMovingRing(outerRing);
   rotateCarousel();
+  rotateParametricShapes();
 }
 
 function rotateCarousel() {
   carousel.rotateY(delta * carouselRotationSpeed);
+}
+
+function rotateParametricShapes() {
+  for (var parametricShape of parametricShapes) {
+    parametricShape.rotateX(delta * carouselRotationSpeed);
+    parametricShape.rotateY(delta * carouselRotationSpeed);
+    parametricShape.rotateZ(delta * carouselRotationSpeed);
+  }
 }
 
 function tryMovingRing(ring) {
