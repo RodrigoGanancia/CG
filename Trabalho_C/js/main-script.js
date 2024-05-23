@@ -15,7 +15,13 @@ var geometry, mesh;
 
 var spotlights = [];
 
-var parametricFunctions = [parametricFunction1, parametricFunction2, parametricFunction3, parametricFunction4, parametricFunction5];
+var parametricFunctions = [
+  parametricFunction1,
+  parametricFunction2,
+  parametricFunction3,
+  parametricFunction4,
+  parametricFunction5,
+];
 const ambientLight = new THREE.AmbientLight(0xffa500, 0.5);
 
 const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
@@ -49,9 +55,9 @@ function createScene() {
   addFloor(0, 0, 0);
 
   scene.onPointerDown = () => {
-    xr.baseExperience.exitXRAsync()
-    scene.pointerDown = null
-  }
+    xr.baseExperience.exitXRAsync();
+    scene.pointerDown = null;
+  };
 }
 
 //////////////////////
@@ -81,7 +87,7 @@ function createCamera(x, y, z, lookPosition) {
 function createSpotlight(x, y, z, scene) {
   var spotlight = new THREE.SpotLight(0xffffff, 10);
   spotlight.position.set(x, y, z);
-  spotlight.target.position.set(x, y + 1, z); 
+  spotlight.target.position.set(x, y + 1, z);
   scene.add(spotlight);
   scene.add(spotlight.target);
   spotlights.push(spotlight);
@@ -171,11 +177,11 @@ function parametricFunction4(u, v, target) {
 }
 
 function parametricFunction5(u, v, target) {
-  var u = u * Math.PI; 
+  var u = u * Math.PI;
   var v = v * 4 * Math.PI;
 
   var x = Math.pow(1, v) * Math.pow(Math.sin(u), 0.3) * Math.sin(v);
-  var y = v * Math.sin(u * 0.5 ) * Math.cos(u * 0.6);
+  var y = v * Math.sin(u * 0.5) * Math.cos(u * 0.6);
   var z = Math.pow(1, v) * Math.pow(Math.sin(u), 0.1) * Math.cos(v);
 
   target.set(x, y, z);
@@ -185,13 +191,10 @@ function addParametricShape(obj, x, y, z, ParametricFunc) {
   "use strict";
 
   geometry = new ParametricGeometry(ParametricFunc);
-  //material = new THREE.MeshPhongMaterial({
-  //  color: 0x000000,
-  //  side: THREE.DoubleSide,
-  //  shading: THREE.FlatShading,
-  //});
-  material = new THREE.MeshBasicMaterial({
+  material = new THREE.MeshPhongMaterial({
     color: 0x000000,
+    side: THREE.DoubleSide,
+    shading: THREE.FlatShading,
   });
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
@@ -240,6 +243,49 @@ function addRing(obj, x, y, z, innerRadius, outerRadius) {
   obj.add(mesh);
 }
 
+function createParametricShapes(x, y, z) {
+  for (var i = 0; i < 8; i++) {
+    var x = Math.cos((Math.PI / 4) * i) * 3.5;
+    var z = Math.sin((Math.PI / 4) * i) * 3.5;
+    addParametricShape(
+      innerRing,
+      x,
+      y,
+      z,
+      parametricFunctions[
+        Math.floor(Math.random() * parametricFunctions.length)
+      ],
+    );
+    createSpotlight(x, y, z, scene);
+
+    var x = Math.cos((Math.PI / 4) * i) * 6.5;
+    var z = Math.sin((Math.PI / 4) * i) * 6.5;
+    addParametricShape(
+      middleRing,
+      x,
+      y,
+      z,
+      parametricFunctions[
+        Math.floor(Math.random() * parametricFunctions.length)
+      ],
+    );
+    createSpotlight(x, y, z, scene);
+
+    var x = Math.cos((Math.PI / 4) * i) * 9.5;
+    var z = Math.sin((Math.PI / 4) * i) * 9.5;
+    addParametricShape(
+      outerRing,
+      x,
+      y,
+      z,
+      parametricFunctions[
+        Math.floor(Math.random() * parametricFunctions.length)
+      ],
+    );
+    createSpotlight(x, y, z, scene);
+  }
+}
+
 function createCarousel(x, y, z) {
   "use strict";
 
@@ -249,25 +295,7 @@ function createCarousel(x, y, z) {
   innerRing = createRing(carousel, x, y, z, 2, 5, 2 * ringHeight);
   middleRing = createRing(carousel, x, y, z, 5, 8, ringHeight);
   outerRing = createRing(carousel, x, y, z, 8, 11, 0);
-
-  for (var i = 0; i < 8; i++) {
-    var x = Math.cos((Math.PI / 4) * i) * 3.5;
-    var z = Math.sin((Math.PI / 4) * i) * 3.5;
-    addParametricShape(innerRing, x, 1, z, parametricFunctions[Math.floor(Math.random() * parametricFunctions.length)]);
-    createSpotlight(x, 1, z, scene);
-
-    var x = Math.cos((Math.PI / 4) * i) * 6.5;
-    var z = Math.sin((Math.PI / 4) * i) * 6.5;
-    addParametricShape(middleRing, x, 1, z, parametricFunctions[Math.floor(Math.random() * parametricFunctions.length)]);
-    createSpotlight(x, 1, z, scene);
-
-    var x = Math.cos((Math.PI / 4) * i) * 9.5;
-    var z = Math.sin((Math.PI / 4) * i) * 9.5;
-    addParametricShape(outerRing, x, 1, z, parametricFunctions[Math.floor(Math.random() * parametricFunctions.length)]);
-    createSpotlight(x, 1, z, scene);
-
-  }
-
+  createParametricShapes(x, 1, z);
 
   scene.add(carousel);
 }
@@ -386,14 +414,13 @@ function init() {
 
   clock = new THREE.Clock();
 
-  createCamera(15, 20, 5, new THREE.Vector3(0, 10, 0));
+  createCamera(30, 20, 5, new THREE.Vector3(0, 10, 0));
   createLight(10, 20, 0);
   createAmbientLight();
 
   window.addEventListener("resize", onResize, false);
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
-  
 }
 
 /////////////////////
@@ -408,8 +435,6 @@ function animate() {
     update();
     render();
   });
-
-  
 }
 
 ////////////////////////////
@@ -471,11 +496,10 @@ function onKeyDown(e) {
     case "s":
     case "S":
       for (var i = 0; i < spotlights.length; i++) {
-        spotlights[i].visible = !spotlights[i].visible; 
+        spotlights[i].visible = !spotlights[i].visible;
       }
       break;
   }
-
 }
 
 function toggleRing(ring) {
