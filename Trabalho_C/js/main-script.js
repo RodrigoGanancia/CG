@@ -12,20 +12,23 @@ import { ParametricGeometry } from "three/addons/geometries/ParametricGeometry.j
 var camera, scene, renderer, delta, clock, pointLight;
 var carousel, innerRing, middleRing, outerRing;
 var geometry, mesh;
-const ambientLight = new THREE.AmbientLight(0xFFA500); // soft white light
+const ambientLight = new THREE.AmbientLight(0xffa500); // soft white light
 
-const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff }); // Red
-const phongMaterial = new THREE.MeshPhongMaterial({ color: 0x00ff00, shininess: 100 }); // Green
-const toonMaterial = new THREE.MeshToonMaterial({ color: 0x0000ff }); // Blue
+const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+const phongMaterial = new THREE.MeshPhongMaterial({
+  color: 0x00ff00,
+  shininess: 100,
+});
+const toonMaterial = new THREE.MeshToonMaterial({ color: 0x0000ff });
 const normalMaterial = new THREE.MeshNormalMaterial();
-const basicMaterial = new THREE.MeshBasicMaterial({ color: 0xA4f12D });
+const basicMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
 var material = basicMaterial;
 
 const collumnHeight = 20;
 const ringHeight = 2;
 const ringSpeed = 10;
-const carouselRotationSpeed = 0.2;
+const carouselRotationSpeed = 0.5;
 
 /////////////////////
 /* CREATE SCENE(S) */
@@ -69,7 +72,7 @@ function createCamera(x, y, z, lookPosition) {
 function createLight(x, y, z) {
   "use strict";
 
-  pointLight = new THREE.PointLight("0xfffff", 19000, 1000);
+  pointLight = new THREE.PointLight(0xffffff, 19000, 1000);
   pointLight.position.set(x, y, z);
   scene.add(pointLight);
 }
@@ -77,7 +80,6 @@ function createLight(x, y, z) {
 function createAmbientLight() {
   scene.add(ambientLight);
 }
-
 
 ////////////////////////
 /* CREATE OBJECT3D(S) */
@@ -91,43 +93,40 @@ function addColumn(obj, x, y, z) {
   obj.add(mesh);
 }
 
-var paramFunction1 = function (u, v) {
-  var u = (u * 2 * Math.PI) - Math.PI;
-  var v = (v * 2 * Math.PI) - Math.PI;
+function parametricFunction1(u, v, target) {
+  u = u * 2 * Math.PI - Math.PI;
+  v = v * 2 * Math.PI - Math.PI;
 
   var x = Math.sin(u) * Math.sin(v) + 0.05 * Math.cos(20 * v);
   var y = Math.cos(u) * Math.sin(v) + 0.05 * Math.cos(20 * u);
   var z = Math.cos(v);
 
-
-  return new THREE.Vector3(x, y, z);
+  target.set(x, y, z);
 }
 
-var paramFunction2 = function (u, v) {
+function paramFunction2(u, v) {
   var u = u * 2 * Math.PI;
-  var v = (v * 2 * Math.PI) - Math.PI;
+  var v = v * 2 * Math.PI - Math.PI;
 
   var x = Math.cos(u);
   var y = Math.sin(u) + Math.cos(v);
   var z = Math.sin(v);
 
-
   return new THREE.Vector3(x, y, z);
 }
 
-var paramFunction3 = function (u, v) {
+function paramFunction3(u, v) {
   var u = u * 2;
-  var v = (v * 4 * Math.PI);
+  var v = v * 4 * Math.PI;
 
   var x = Math.cos(v) * Math.sin(u);
   var y = Math.sin(v) * Math.sin(u);
   var z = 0.2 * v + (Math.cos(u) + Math.log(Math.tan(u / 2)));
 
-
   return new THREE.Vector3(x, y, z);
 }
 
-var paramFunction4 = function (u, v) {
+function paramFunction4(u, v) {
   var a = 3;
   var n = 3;
   var m = 1;
@@ -135,21 +134,30 @@ var paramFunction4 = function (u, v) {
   var u = u * 4 * Math.PI;
   var v = v * 2 * Math.PI;
 
-  var x = (a + Math.cos(n * u / 2.0) * Math.sin(v) - Math.sin(n * u / 2.0) * Math.sin(2 * v)) * Math.cos(m * u / 2.0);
-  var y = (a + Math.cos(n * u / 2.0) * Math.sin(v) - Math.sin(n * u / 2.0) * Math.sin(2 * v)) * Math.sin(m * u / 2.0);
-  var z = Math.sin(n * u / 2.0) * Math.sin(v) + Math.cos(n * u / 2.0) * Math.sin(2 * v);
+  var x =
+    (a +
+      Math.cos((n * u) / 2.0) * Math.sin(v) -
+      Math.sin((n * u) / 2.0) * Math.sin(2 * v)) *
+    Math.cos((m * u) / 2.0);
+  var y =
+    (a +
+      Math.cos((n * u) / 2.0) * Math.sin(v) -
+      Math.sin((n * u) / 2.0) * Math.sin(2 * v)) *
+    Math.sin((m * u) / 2.0);
+  var z =
+    Math.sin((n * u) / 2.0) * Math.sin(v) +
+    Math.cos((n * u) / 2.0) * Math.sin(2 * v);
 
   return new THREE.Vector3(x, y, z);
 }
 
-var paramFunction5 = function (u, v) {
-
+function paramFunction5(u, v) {
   var u = u * Math.PI * 2;
   var v = v * 8 * Math.PI;
 
-  var x = Math.pow(1.2, v) * Math.pow((Math.sin(u)), 0.5) * Math.sin(v);
+  var x = Math.pow(1.2, v) * Math.pow(Math.sin(u), 0.5) * Math.sin(v);
   var y = v * Math.sin(u) * Math.cos(u);
-  var z = Math.pow(1.2, v) * Math.pow((Math.sin(u)), 0.3) * Math.cos(v);
+  var z = Math.pow(1.2, v) * Math.pow(Math.sin(u), 0.3) * Math.cos(v);
 
   return new THREE.Vector3(x, y, z);
 }
@@ -157,8 +165,15 @@ var paramFunction5 = function (u, v) {
 function addParametricShape(obj, x, y, z, ParametricFunc) {
   "use strict";
 
-  //geometry = new THREE.ParametricGeometry(ParametricFunc);
-  //material = new THREE.MeshPhongMaterial({color: 0xcc3333a, side: THREE.DoubleSide, shading: THREE.FlatShading});
+  geometry = new ParametricGeometry(ParametricFunc);
+  //material = new THREE.MeshPhongMaterial({
+  //  color: 0x000000,
+  //  side: THREE.DoubleSide,
+  //  shading: THREE.FlatShading,
+  //});
+  material = new THREE.MeshBasicMaterial({
+    color: 0x000000,
+  });
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
 
@@ -195,14 +210,14 @@ function addRing(obj, x, y, z, innerRadius, outerRadius) {
   shape.holes.push(holePath);
 
   const extrudeSettings = {
-      depth: 2,
-      bevelEnabled: false
+    depth: 2,
+    bevelEnabled: false,
   };
 
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
-  mesh.rotateX(Math.PI/2);
+  mesh.rotateX(Math.PI / 2);
   obj.add(mesh);
 }
 
@@ -212,11 +227,21 @@ function createCarousel(x, y, z) {
   carousel = new THREE.Object3D();
 
   addColumn(carousel, 0, collumnHeight / 2, 0);
-  innerRing = createRing(carousel, x, y, z, 1, 4, 2 * ringHeight);
-  middleRing = createRing(carousel, x, y, z, 4, 7, ringHeight);
-  outerRing = createRing(carousel, x, y, z, 7, 10, 0);
+  innerRing = createRing(carousel, x, y, z, 2, 5, 2 * ringHeight);
+  middleRing = createRing(carousel, x, y, z, 5, 8, ringHeight);
+  outerRing = createRing(carousel, x, y, z, 8, 11, 0);
 
-  addParametricShape(carousel, 0, 0, 0, paramFunction1);
+  for (var i = 0; i < 8; i++) {
+    var x = Math.cos((Math.PI / 4) * i) * 3.5;
+    var z = Math.sin((Math.PI / 4) * i) * 3.5;
+    addParametricShape(innerRing, x, 1, z, parametricFunction1);
+    var x = Math.cos((Math.PI / 4) * i) * 6.5;
+    var z = Math.sin((Math.PI / 4) * i) * 6.5;
+    addParametricShape(middleRing, x, 1, z, parametricFunction1);
+    var x = Math.cos((Math.PI / 4) * i) * 9.5;
+    var z = Math.sin((Math.PI / 4) * i) * 9.5;
+    addParametricShape(outerRing, x, 1, z, parametricFunction1);
+  }
 
   scene.add(carousel);
 }
@@ -224,15 +249,15 @@ function createCarousel(x, y, z) {
 function addSkydome() {
   "use strict";
 
-  var texture = new THREE.TextureLoader().load('./img/background.png');
+  var texture = new THREE.TextureLoader().load("./img/background.png");
 
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(5, 5); 
+  texture.repeat.set(5, 5);
   var skyMaterial = new THREE.MeshBasicMaterial({ map: texture });
   var skyGeometry = new THREE.SphereGeometry(40, 40, 40);
 
   var sky = new THREE.Mesh(skyGeometry, skyMaterial);
-  sky.material.side = THREE.BackSide; 
+  sky.material.side = THREE.BackSide;
   scene.add(sky);
 }
 
@@ -328,17 +353,16 @@ function init() {
   renderer.xr.enabled = true;
 
   document.body.appendChild(VRButton.createButton(renderer));
-  
+
   document.body.appendChild(renderer.domElement);
 
   createScene();
 
   clock = new THREE.Clock();
 
-  createCamera(30, 20, 5, new THREE.Vector3(0, 10, 0));
+  createCamera(15, 20, 5, new THREE.Vector3(0, 10, 0));
   createLight(10, 20, 0);
   createAmbientLight();
-
 
   window.addEventListener("resize", onResize, false);
   window.addEventListener("keydown", onKeyDown);
@@ -353,11 +377,10 @@ function animate() {
 
   update();
 
-  renderer.setAnimationLoop(function() {
-    update(); 
+  renderer.setAnimationLoop(function () {
+    update();
     render();
-});
-
+  });
 }
 
 ////////////////////////////
