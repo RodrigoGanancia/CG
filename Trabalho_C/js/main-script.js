@@ -9,9 +9,11 @@ import { ParametricGeometry } from "three/addons/geometries/ParametricGeometry.j
 /* GLOBAL VARIABLES */
 //////////////////////
 
-var camera, scene, renderer, delta, clock, pointLight;
+var camera, scene, renderer, delta, clock, pointLight, spotlight;
 var carousel, innerRing, middleRing, outerRing;
 var geometry, mesh;
+
+var parametricFunctions = [parametricFunction1, parametricFunction2, parametricFunction3, parametricFunction4, parametricFunction5];
 const ambientLight = new THREE.AmbientLight(0xffa500); // soft white light
 
 const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
@@ -43,6 +45,11 @@ function createScene() {
   addSkydome();
   createCarousel(0, 0, 0);
   addFloor(0, 0, 0);
+
+  scene.onPointerDown = () => {
+    xr.baseExperience.exitXRAsync()
+    scene.pointerDown = null
+  }
 }
 
 //////////////////////
@@ -69,6 +76,13 @@ function createCamera(x, y, z, lookPosition) {
 /* CREATE LIGHT(S) */
 /////////////////////
 
+function createSpotlight(x, y, z, scene) {
+  var spotlight = new THREE.SpotLight(0xffffff, 10);
+  spotlight.position.set(x, y, z);
+  spotlight.target.position.set(x, y + 1, z); 
+  scene.add(spotlight);
+  scene.add(spotlight.target);
+}
 function createLight(x, y, z) {
   "use strict";
 
@@ -104,7 +118,7 @@ function parametricFunction1(u, v, target) {
   target.set(x, y, z);
 }
 
-function paramFunction2(u, v) {
+function parametricFunction2(u, v, target) {
   var u = u * 2 * Math.PI;
   var v = v * 2 * Math.PI - Math.PI;
 
@@ -112,10 +126,10 @@ function paramFunction2(u, v) {
   var y = Math.sin(u) + Math.cos(v);
   var z = Math.sin(v);
 
-  return new THREE.Vector3(x, y, z);
+  target.set(x, y, z);
 }
 
-function paramFunction3(u, v) {
+function parametricFunction3(u, v, target) {
   var u = u * 2;
   var v = v * 4 * Math.PI;
 
@@ -123,15 +137,15 @@ function paramFunction3(u, v) {
   var y = Math.sin(v) * Math.sin(u);
   var z = 0.2 * v + (Math.cos(u) + Math.log(Math.tan(u / 2)));
 
-  return new THREE.Vector3(x, y, z);
+  target.set(x, y, z);
 }
 
-function paramFunction4(u, v) {
-  var a = 3;
-  var n = 3;
+function parametricFunction4(u, v, target) {
+  var a = 1;
+  var n = 1;
   var m = 1;
 
-  var u = u * 4 * Math.PI;
+  var u = u * 2 * Math.PI;
   var v = v * 2 * Math.PI;
 
   var x =
@@ -148,18 +162,18 @@ function paramFunction4(u, v) {
     Math.sin((n * u) / 2.0) * Math.sin(v) +
     Math.cos((n * u) / 2.0) * Math.sin(2 * v);
 
-  return new THREE.Vector3(x, y, z);
+  target.set(x, y, z);
 }
 
-function paramFunction5(u, v) {
-  var u = u * Math.PI * 2;
-  var v = v * 8 * Math.PI;
+function parametricFunction5(u, v, target) {
+  var u = u * Math.PI; 
+  var v = v * 4 * Math.PI;
 
-  var x = Math.pow(1.2, v) * Math.pow(Math.sin(u), 0.5) * Math.sin(v);
-  var y = v * Math.sin(u) * Math.cos(u);
-  var z = Math.pow(1.2, v) * Math.pow(Math.sin(u), 0.3) * Math.cos(v);
+  var x = Math.pow(1, v) * Math.pow(Math.sin(u), 0.3) * Math.sin(v);
+  var y = v * Math.sin(u * 0.5 ) * Math.cos(u * 0.6);
+  var z = Math.pow(1, v) * Math.pow(Math.sin(u), 0.1) * Math.cos(v);
 
-  return new THREE.Vector3(x, y, z);
+  target.set(x, y, z);
 }
 
 function addParametricShape(obj, x, y, z, ParametricFunc) {
@@ -234,14 +248,21 @@ function createCarousel(x, y, z) {
   for (var i = 0; i < 8; i++) {
     var x = Math.cos((Math.PI / 4) * i) * 3.5;
     var z = Math.sin((Math.PI / 4) * i) * 3.5;
-    addParametricShape(innerRing, x, 1, z, parametricFunction1);
+    addParametricShape(innerRing, x, 1, z, parametricFunctions[Math.floor(Math.random() * parametricFunctions.length)]);
+    createSpotlight(x, 1, z, scene);
+
     var x = Math.cos((Math.PI / 4) * i) * 6.5;
     var z = Math.sin((Math.PI / 4) * i) * 6.5;
-    addParametricShape(middleRing, x, 1, z, parametricFunction1);
+    addParametricShape(middleRing, x, 1, z, parametricFunctions[Math.floor(Math.random() * parametricFunctions.length)]);
+    createSpotlight(x, 1, z, scene);
+
     var x = Math.cos((Math.PI / 4) * i) * 9.5;
     var z = Math.sin((Math.PI / 4) * i) * 9.5;
-    addParametricShape(outerRing, x, 1, z, parametricFunction1);
+    addParametricShape(outerRing, x, 1, z, parametricFunctions[Math.floor(Math.random() * parametricFunctions.length)]);
+    createSpotlight(x, 1, z, scene);
+
   }
+
 
   scene.add(carousel);
 }
@@ -367,6 +388,7 @@ function init() {
   window.addEventListener("resize", onResize, false);
   window.addEventListener("keydown", onKeyDown);
   window.addEventListener("keyup", onKeyUp);
+  
 }
 
 /////////////////////
@@ -381,6 +403,8 @@ function animate() {
     update();
     render();
   });
+
+  
 }
 
 ////////////////////////////
