@@ -9,12 +9,14 @@ import { ParametricGeometry } from "three/addons/geometries/ParametricGeometry.j
 /* GLOBAL VARIABLES */
 //////////////////////
 
-var camera, scene, renderer, delta, clock, pointLight, spotlight;
+var camera, scene, renderer, delta, clock, pointLight;
 var carousel, innerRing, middleRing, outerRing;
 var geometry, mesh;
 
+var spotlights = [];
+
 var parametricFunctions = [parametricFunction1, parametricFunction2, parametricFunction3, parametricFunction4, parametricFunction5];
-const ambientLight = new THREE.AmbientLight(0xffa500); // soft white light
+const ambientLight = new THREE.AmbientLight(0xffa500, 0.5);
 
 const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
 const phongMaterial = new THREE.MeshPhongMaterial({
@@ -82,7 +84,9 @@ function createSpotlight(x, y, z, scene) {
   spotlight.target.position.set(x, y + 1, z); 
   scene.add(spotlight);
   scene.add(spotlight.target);
+  spotlights.push(spotlight);
 }
+
 function createLight(x, y, z) {
   "use strict";
 
@@ -93,6 +97,7 @@ function createLight(x, y, z) {
 
 function createAmbientLight() {
   scene.add(ambientLight);
+  ambientLight.visible = false;
 }
 
 ////////////////////////
@@ -461,8 +466,16 @@ function onKeyDown(e) {
     case "d":
     case "D":
       pointLight.visible = !pointLight.visible;
+      ambientLight.visible = ambientLight.visible = true;
+      break;
+    case "s":
+    case "S":
+      for (var i = 0; i < spotlights.length; i++) {
+        spotlights[i].visible = !spotlights[i].visible; 
+      }
       break;
   }
+
 }
 
 function toggleRing(ring) {
