@@ -35,6 +35,7 @@ function getRandomRed() {
 }
 
 const lambertMaterial = new THREE.MeshLambertMaterial({ color: getRandomRed() });
+
 const phongMaterial = new THREE.MeshPhongMaterial({
   color: getRandomRed(),
   shininess: 100,
@@ -143,6 +144,10 @@ function createAmbientLight() {
 
 function addColumn(obj, x, y, z) {
   "use strict";
+
+  var material = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(Math.random() * 0xffffff),
+  });
 
   geometry = new THREE.CylinderGeometry(1, 1, 20, 32);
   mesh = new THREE.Mesh(geometry, material);
@@ -310,6 +315,11 @@ function addRing(obj, x, y, z, innerRadius, outerRadius) {
     bevelEnabled: false,
   };
 
+
+  var material = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(Math.random() * 0xffffff),
+  });
+
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
@@ -415,12 +425,12 @@ function createMobiusStrip() {
 
   for (let i = 0; i < 2 * count; i++) {
     const a = (Math.PI / count) * 2 * i;
-    const x = c.x + r * size.x * (1 + 0.5 * Math.cos(a / 2)) * Math.cos(a); // x
-    const y = c.y - r * size.y * 0.5 * Math.sin(a / 2); // y
-    const z = c.z + r * size.z * (1 + 0.5 * Math.cos(a / 2)) * Math.sin(a); // z
-    vArray.push(x); // x
-    vArray.push(y); // y
-    vArray.push(z); // z
+    const x = c.x + r * size.x * (1 + 0.5 * Math.cos(a / 2)) * Math.cos(a);
+    const y = c.y - r * size.y * 0.5 * Math.sin(a / 2);
+    const z = c.z + r * size.z * (1 + 0.5 * Math.cos(a / 2)) * Math.sin(a);
+    vArray.push(x);
+    vArray.push(y);
+    vArray.push(z);
 
     if (i % 16 === 0) {
       const light = new THREE.PointLight(0xffffff, 10);
@@ -443,10 +453,15 @@ function createMobiusStrip() {
 
   geometry.computeVertexNormals();
 
+
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x00ff00,
+    side: THREE.DoubleSide,
+  });
+
   mobiusStrip = new THREE.Mesh(geometry, material);
   scene.add(mobiusStrip);
 }
-
 
 ////////////
 /* UPDATE */
@@ -548,7 +563,6 @@ function init() {
 
   window.addEventListener("resize", onResize, false);
   window.addEventListener("keydown", onKeyDown);
-  window.addEventListener("keyup", onKeyUp);
 }
 
 /////////////////////
@@ -647,16 +661,8 @@ function applyMaterial(node, newMaterial) {
 
 function setMaterial(newMaterial) {
   newMaterial.side = THREE.DoubleSide;
-
   carousel.traverse((node) => applyMaterial(node, newMaterial));
   mobiusStrip.traverse((node) => applyMaterial(node, newMaterial));
-}
-
-///////////////////////
-/* KEY UP CALLBACK */
-///////////////////////
-function onKeyUp(e) {
-  "use strict";
 }
 
 init();
