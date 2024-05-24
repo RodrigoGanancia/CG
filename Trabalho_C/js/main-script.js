@@ -13,6 +13,8 @@ var geometry, mesh;
 var spotlights = [];
 var parametricShapes = [];
 
+var mobiusLights = [];
+
 const parametricFunctions = [
   torusParametricFunction,
   saddleParametricFunction,
@@ -248,7 +250,7 @@ function addParametricShape(obj, x, y, z, ParametricFunc) {
   material = new THREE.MeshPhongMaterial({
     color: new THREE.Color(Math.random(), Math.random(), Math.random()),
     side: THREE.DoubleSide,
-    shading: THREE.FlatShading,
+    flatShading: true,
   });
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
@@ -388,13 +390,6 @@ function addFloor(x, y, z) {
 
   scene.add(mesh);
 }
-function createPoint(x, y, z, mat, size) {
-  "use strict";
-  geometry = new THREE.SphereGeometry(size);
-  mesh = new THREE.Mesh(geometry, mat);
-  mesh.position.set(x, y, z);
-  scene.add(mesh);
-}
 
 function createMobiusStrip() {
   "use strict";
@@ -416,6 +411,13 @@ function createMobiusStrip() {
     vArray.push(x); // x
     vArray.push(y); // y
     vArray.push(z); // z
+
+    if (i % 16 === 0) {
+      const light = new THREE.PointLight(0xffffff, 10);
+      light.position.set(x, y, z);
+      scene.add(light);
+      mobiusLights.push(light);
+    }
   }
   const vertices = new Float32Array(vArray);
 
@@ -432,6 +434,7 @@ function createMobiusStrip() {
   geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
   mobiusStrip = new THREE.Mesh(geometry, material);
   scene.add(mobiusStrip);
+
 }
 
 ////////////
@@ -602,6 +605,12 @@ function onKeyDown(e) {
     case "S":
       for (var i = 0; i < spotlights.length; i++) {
         spotlights[i].visible = !spotlights[i].visible;
+      }
+      break;
+    case "p":
+    case "P":
+      for (var i = 0; i < mobiusLights.length; i++) {
+        mobiusLights[i].visible = !mobiusLights[i].visible;
       }
       break;
   }
