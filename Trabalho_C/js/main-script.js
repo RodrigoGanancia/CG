@@ -27,7 +27,7 @@ const parametricFunctions = [
 ];
 const ambientLight = new THREE.AmbientLight(0xffa500, 0.5);
 
-const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xA32F00 });
+const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xa32f00 });
 const phongMaterial = new THREE.MeshPhongMaterial({
   color: 0x00ff00,
   shininess: 100,
@@ -134,8 +134,9 @@ function createAmbientLight() {
 function addColumn(obj, x, y, z) {
   "use strict";
 
-  var material = new THREE.MeshBasicMaterial({ color: new THREE.Color(Math.random() * 0xffffff) });
-
+  var material = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(Math.random() * 0xffffff),
+  });
 
   geometry = new THREE.CylinderGeometry(1, 1, 20, 32);
   mesh = new THREE.Mesh(geometry, material);
@@ -303,7 +304,9 @@ function addRing(obj, x, y, z, innerRadius, outerRadius) {
     bevelEnabled: false,
   };
 
-  var material = new THREE.MeshBasicMaterial({ color: new THREE.Color(Math.random() * 0xffffff) });
+  var material = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(Math.random() * 0xffffff),
+  });
 
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   mesh = new THREE.Mesh(geometry, material);
@@ -385,7 +388,7 @@ function addSkydome() {
 }
 
 function addFloor(x, y, z) {
-  geometry = new THREE.PlaneGeometry(100, 100); // width, height
+  geometry = new THREE.PlaneGeometry(100, 100);
   material = new THREE.MeshBasicMaterial({
     color: 0x990000,
     side: THREE.DoubleSide,
@@ -410,12 +413,12 @@ function createMobiusStrip() {
 
   for (let i = 0; i < 2 * count; i++) {
     const a = (Math.PI / count) * 2 * i;
-    const x = c.x + r * size.x * (1 + 0.5 * Math.cos(a / 2)) * Math.cos(a); // x
-    const y = c.y - r * size.y * 0.5 * Math.sin(a / 2); // y
-    const z = c.z + r * size.z * (1 + 0.5 * Math.cos(a / 2)) * Math.sin(a); // z
-    vArray.push(x); // x
-    vArray.push(y); // y
-    vArray.push(z); // z
+    const x = c.x + r * size.x * (1 + 0.5 * Math.cos(a / 2)) * Math.cos(a);
+    const y = c.y - r * size.y * 0.5 * Math.sin(a / 2);
+    const z = c.z + r * size.z * (1 + 0.5 * Math.cos(a / 2)) * Math.sin(a);
+    vArray.push(x);
+    vArray.push(y);
+    vArray.push(z);
 
     if (i % 16 === 0) {
       const light = new THREE.PointLight(0xffffff, 10);
@@ -439,12 +442,14 @@ function createMobiusStrip() {
   // Compute the normals for the geometry
   geometry.computeVertexNormals();
 
-  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x00ff00,
+    side: THREE.DoubleSide,
+  });
 
   mobiusStrip = new THREE.Mesh(geometry, material);
   scene.add(mobiusStrip);
 }
-
 
 ////////////
 /* UPDATE */
@@ -539,7 +544,6 @@ function init() {
 
   window.addEventListener("resize", onResize, false);
   window.addEventListener("keydown", onKeyDown);
-  window.addEventListener("keyup", onKeyUp);
 }
 
 /////////////////////
@@ -639,19 +643,9 @@ function setMaterial(newMaterial) {
   });
   mobiusStrip.traverse(function (node) {
     if (node instanceof THREE.Mesh) {
-      if (node.material) {
-        node.material.dispose(); // Dispose of the old material
-      }
       node.material = newMaterial;
     }
   });
-}
-
-///////////////////////
-/* KEY UP CALLBACK */
-///////////////////////
-function onKeyUp(e) {
-  "use strict";
 }
 
 init();
