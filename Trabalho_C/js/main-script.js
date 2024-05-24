@@ -7,7 +7,7 @@ import { ParametricGeometry } from "three/addons/geometries/ParametricGeometry.j
 //////////////////////
 
 var camera, scene, renderer, delta, clock, directionalLight;
-var carousel, innerRing, middleRing, outerRing;
+var carousel, innerRing, middleRing, outerRing, mobiusStrip;
 var geometry, mesh;
 
 var spotlights = [];
@@ -53,6 +53,7 @@ function createScene() {
 
   addSkydome();
   createCarousel(0, 0, 0);
+  createMobiusStrip();
   addFloor(0, 0, 0);
 }
 
@@ -374,7 +375,65 @@ function addFloor(x, y, z) {
 
   scene.add(mesh);
 }
+function createPoint(x, y, z, mat, size) {
+  "use strict"
+  geometry = new THREE.SphereGeometry(size);
+  mesh = new THREE.Mesh(geometry, mat);
+  mesh.position.set(x, y, z);
+  scene.add(mesh);
+}
 
+function createMobiusStrip() {
+  "use strict"
+
+  geometry = new THREE.BufferGeometry();
+  
+  const count = 128;
+  const c = new THREE.Vector3(0, collumnHeight + 3, 0);
+  const r = 3;
+  const size = new THREE.Vector3(1, 0.7, 3);
+  let vArray = [];
+  let iArray = [];
+
+  for (let i = 0; i < 2*count; i++) {
+    const a = Math.PI/count*2*i;
+    const x = c.x + r * size.x * (1 + 0.5 * Math.cos(a/2)) * Math.cos(a); // x
+    const y = c.y - r * size.y * 0.5 * Math.sin(a/2); // y
+    const z = c.z + r * size.z * (1 + 0.5 * Math.cos(a/2)) * Math.sin(a); // z
+    vArray.push(x); // x
+    vArray.push(y); // y
+    vArray.push(z); // z
+  }
+  const vertices = new Float32Array(vArray);
+
+  for (let i = 0; i < count - 1; i++) {
+    iArray.push(i, count + i, count + i + 1)
+    iArray.push(count + i + 1, i, i + 1);
+  }
+  iArray.push(count - 1, 2 * count - 1, 0);
+  iArray.push(0, count-1, count);
+
+  geometry.setIndex(iArray);
+  geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+  mobiusStrip = new THREE.Mesh(geometry, material);
+  scene.add(mobiusStrip);
+}
+
+//////////////////////
+/* CHECK COLLISIONS */
+//////////////////////
+
+function checkCollisions() {
+  "use strict";
+}
+
+///////////////////////
+/* HANDLE COLLISIONS */
+///////////////////////
+
+function handleCollisions() {
+  "use strict";
+}
 ////////////
 /* UPDATE */
 ////////////
@@ -550,6 +609,7 @@ function setMaterial(newMaterial) {
       node.material = newMaterial;
     }
   });
+  mobiusStrip.material = newMaterial;
 }
 
 ///////////////////////
