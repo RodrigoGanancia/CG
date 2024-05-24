@@ -1,8 +1,5 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { VRButton } from "three/addons/webxr/VRButton.js";
-import * as Stats from "three/addons/libs/stats.module.js";
-import { GUI } from "three/addons/libs/lil-gui.module.min.js";
 import { ParametricGeometry } from "three/addons/geometries/ParametricGeometry.js";
 
 //////////////////////
@@ -16,12 +13,15 @@ var geometry, mesh;
 var spotlights = [];
 var parametricShapes = [];
 
-var parametricFunctions = [
-  parametricFunction1,
-  parametricFunction2,
-  parametricFunction3,
-  parametricFunction4,
-  parametricFunction5,
+const parametricFunctions = [
+  torusParametricFunction,
+  saddleParametricFunction,
+  cylinderParametricFunction,
+  coneParametricFunction,
+  paraboloidParametricFunction,
+  squareParametricFunction,
+  hyperboloidParametricFunction,
+  sphereParametricFunction,
 ];
 const ambientLight = new THREE.AmbientLight(0xffa500, 0.5);
 
@@ -54,7 +54,6 @@ function createScene() {
   addSkydome();
   createCarousel(0, 0, 0);
   addFloor(0, 0, 0);
-
 }
 
 //////////////////////
@@ -82,7 +81,7 @@ function createCamera(x, y, z, lookPosition) {
 /////////////////////
 
 function createSpotlight(x, y, z) {
-  'use strict '
+  "use strict ";
 
   var spotlight = new THREE.SpotLight(0xffffff, 10);
   spotlight.position.set(x, y, z);
@@ -118,71 +117,104 @@ function addColumn(obj, x, y, z) {
   obj.add(mesh);
 }
 
-function parametricFunction1(u, v, target) {
-  u = u * 2 * Math.PI - Math.PI;
-  v = v * 2 * Math.PI - Math.PI;
+// Torus
+function torusParametricFunction(u, v, target) {
+  const R = 0.9;
+  const r = 0.5;
 
-  var x = Math.sin(u) * Math.sin(v) + 0.05 * Math.cos(20 * v);
-  var y = Math.cos(u) * Math.sin(v) + 0.05 * Math.cos(20 * u);
-  var z = Math.cos(v);
-
-  target.set(x, y, z);
-}
-
-function parametricFunction2(u, v, target) {
-  var u = u * 2 * Math.PI;
-  var v = v * 2 * Math.PI - Math.PI;
-
-  var x = Math.cos(u);
-  var y = Math.sin(u) + Math.cos(v);
-  var z = Math.sin(v);
+  const x = (R + r * Math.cos(2 * Math.PI * u)) * Math.cos(2 * Math.PI * v);
+  const y = (R + r * Math.cos(2 * Math.PI * u)) * Math.sin(2 * Math.PI * v);
+  const z = r * Math.sin(2 * Math.PI * u);
 
   target.set(x, y, z);
 }
 
-function parametricFunction3(u, v, target) {
-  var u = u * 2;
-  var v = v * 4 * Math.PI;
+// Saddle
+function saddleParametricFunction(u, v, target) {
+  const a = 1;
+  const b = 1;
 
-  var x = Math.cos(v) * Math.sin(u);
-  var y = Math.sin(v) * Math.sin(u);
-  var z = 0.2 * v + (Math.cos(u) + Math.log(Math.tan(u / 2)));
-
-  target.set(x, y, z);
-}
-
-function parametricFunction4(u, v, target) {
-  var a = 1;
-  var n = 1;
-  var m = 1;
-
-  var u = u * 2 * Math.PI;
-  var v = v * 2 * Math.PI;
-
-  var x =
-    (a +
-      Math.cos((n * u) / 2.0) * Math.sin(v) -
-      Math.sin((n * u) / 2.0) * Math.sin(2 * v)) *
-    Math.cos((m * u) / 2.0);
-  var y =
-    (a +
-      Math.cos((n * u) / 2.0) * Math.sin(v) -
-      Math.sin((n * u) / 2.0) * Math.sin(2 * v)) *
-    Math.sin((m * u) / 2.0);
-  var z =
-    Math.sin((n * u) / 2.0) * Math.sin(v) +
-    Math.cos((n * u) / 2.0) * Math.sin(2 * v);
+  const x = u;
+  const y = v;
+  const z = (u * u) / (a * a) - (v * v) / (b * b);
 
   target.set(x, y, z);
 }
 
-function parametricFunction5(u, v, target) {
-  var u = u * Math.PI;
-  var v = v * 4 * Math.PI;
+// "Squashed" cylinder
+function cylinderParametricFunction(u, v, target) {
+  const r = 1;
+  const h = 2;
+  const s = 0.5;
 
-  var x = Math.pow(1, v) * Math.pow(Math.sin(u), 0.3) * Math.sin(v);
-  var y = v * Math.sin(u * 0.5) * Math.cos(u * 0.6);
-  var z = Math.pow(1, v) * Math.pow(Math.sin(u), 0.1) * Math.cos(v);
+  const x = r * Math.cos(2 * Math.PI * u);
+  const y = s * r * Math.sin(2 * Math.PI * u);
+  const z = h * (v - 0.5);
+
+  target.set(x, y, z);
+}
+
+// Truncated cone
+function coneParametricFunction(u, v, target) {
+  const r1 = 1;
+  const r2 = 0.5;
+  const h = 2;
+
+  const radius = r1 + (r2 - r1) * v;
+  const x = radius * Math.cos(2 * Math.PI * u);
+  const y = radius * Math.sin(2 * Math.PI * u);
+  const z = h * v;
+
+  target.set(x, y, z);
+}
+
+// Paraboloid
+function paraboloidParametricFunction(u, v, target) {
+  const a = 1.3;
+  const b = 1.3;
+
+  const x = a * u * Math.cos(v * 2 * Math.PI);
+  const y = a * u * Math.sin(v * 2 * Math.PI);
+  const z = b * (u * u);
+
+  target.set(x, y, z);
+}
+
+// Square
+function squareParametricFunction(u, v, target) {
+  const x = (u - 0.5) * 2;
+  const y = (v - 0.5) * 2;
+  const z = 0;
+
+  target.set(x, y, z);
+}
+
+// Hyperboloid
+function hyperboloidParametricFunction(u, v, target) {
+  const a = 0.8;
+  const b = 0.8;
+  const vMin = -0.8;
+  const vMax = 0.8;
+
+  u = u * 2 * Math.PI;
+  v = vMin + v * (vMax - vMin);
+
+  const x = a * Math.cosh(v) * Math.cos(u);
+  const y = a * Math.cosh(v) * Math.sin(u);
+  const z = b * Math.sinh(v);
+
+  target.set(x, y, z);
+}
+
+// Sphere
+function sphereParametricFunction(u, v, target) {
+  const radius = 1;
+  const phi = u * 2 * Math.PI;
+  const theta = v * Math.PI;
+
+  const x = radius * Math.sin(theta) * Math.cos(phi);
+  const y = radius * Math.sin(theta) * Math.sin(phi);
+  const z = radius * Math.cos(theta);
 
   target.set(x, y, z);
 }
@@ -201,7 +233,7 @@ function addParametricShape(obj, x, y, z, ParametricFunc) {
   parametricShapes.push(mesh);
 
   obj.add(mesh);
-  
+
   return mesh;
 }
 
@@ -260,8 +292,6 @@ function createParametricShapes(x, y, z) {
       ],
     );
     createSpotlight(x, y, z);
-    
-
 
     var x = Math.cos((Math.PI / 4) * i) * 6.5;
     var z = Math.sin((Math.PI / 4) * i) * 6.5;
@@ -275,8 +305,6 @@ function createParametricShapes(x, y, z) {
       ],
     );
     createSpotlight(x, y, z);
-    
-
 
     var x = Math.cos((Math.PI / 4) * i) * 9.5;
     var z = Math.sin((Math.PI / 4) * i) * 9.5;
@@ -290,7 +318,6 @@ function createParametricShapes(x, y, z) {
       ],
     );
     createSpotlight(x, y, z);
-
   }
 }
 
@@ -334,22 +361,6 @@ function addFloor(x, y, z) {
   mesh.rotateX(Math.PI / 2);
 
   scene.add(mesh);
-}
-
-//////////////////////
-/* CHECK COLLISIONS */
-//////////////////////
-
-function checkCollisions() {
-  "use strict";
-}
-
-///////////////////////
-/* HANDLE COLLISIONS */
-///////////////////////
-
-function handleCollisions() {
-  "use strict";
 }
 
 ////////////
@@ -521,12 +532,11 @@ function onKeyDown(e) {
 
 function toggleRing(ring) {
   ring.userData.moving = !ring.userData.moving;
-
 }
 
 function setMaterial(newMaterial) {
   carousel.traverse(function (node) {
-    if (node instanceof THREE.Mesh ) {
+    if (node instanceof THREE.Mesh) {
       node.material = newMaterial;
     }
   });
