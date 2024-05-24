@@ -27,7 +27,7 @@ const parametricFunctions = [
 ];
 const ambientLight = new THREE.AmbientLight(0xffa500, 0.5);
 
-const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xA32F00 });
 const phongMaterial = new THREE.MeshPhongMaterial({
   color: 0x00ff00,
   shininess: 100,
@@ -115,7 +115,7 @@ function createDirectionalLight(x, y, z) {
   directionalLight.position.set(x, y, z);
 
   const target = new THREE.Object3D();
-  target.position.set(0, 0, 0);
+  target.position.set(0, 40, 0);
   directionalLight.target = target;
 
   scene.add(directionalLight);
@@ -133,6 +133,10 @@ function createAmbientLight() {
 
 function addColumn(obj, x, y, z) {
   "use strict";
+
+  var material = new THREE.MeshBasicMaterial({ color: new THREE.Color(Math.random() * 0xffffff) });
+
+
   geometry = new THREE.CylinderGeometry(1, 1, 20, 32);
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
@@ -299,6 +303,8 @@ function addRing(obj, x, y, z, innerRadius, outerRadius) {
     bevelEnabled: false,
   };
 
+  var material = new THREE.MeshBasicMaterial({ color: new THREE.Color(Math.random() * 0xffffff) });
+
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
@@ -394,8 +400,7 @@ function addFloor(x, y, z) {
 function createMobiusStrip() {
   "use strict";
 
-  geometry = new THREE.BufferGeometry();
-
+  const geometry = new THREE.BufferGeometry();
   const count = 128;
   const c = new THREE.Vector3(0, collumnHeight + 3, 0);
   const r = 3;
@@ -428,14 +433,18 @@ function createMobiusStrip() {
   iArray.push(count - 1, 2 * count - 1, 0);
   iArray.push(0, count - 1, count);
 
-  material.side = THREE.DoubleSide;
-
   geometry.setIndex(iArray);
   geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+
+  // Compute the normals for the geometry
+  geometry.computeVertexNormals();
+
+  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
+
   mobiusStrip = new THREE.Mesh(geometry, material);
   scene.add(mobiusStrip);
-
 }
+
 
 ////////////
 /* UPDATE */
@@ -628,7 +637,14 @@ function setMaterial(newMaterial) {
       node.material = newMaterial;
     }
   });
-  mobiusStrip.material = newMaterial;
+  mobiusStrip.traverse(function (node) {
+    if (node instanceof THREE.Mesh) {
+      if (node.material) {
+        node.material.dispose(); // Dispose of the old material
+      }
+      node.material = newMaterial;
+    }
+  });
 }
 
 ///////////////////////
