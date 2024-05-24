@@ -96,7 +96,7 @@ function createSpotlight(x, y, z) {
 function createDirectionalLight(x, y, z) {
   "use strict";
 
-  directionalLight = new THREE.DirectionalLight(0xffffff);
+  directionalLight = new THREE.DirectionalLight(0xffffff,3);
   directionalLight.position.set(x, y, z);
 
   const target = new THREE.Object3D();
@@ -385,6 +385,7 @@ function createPoint(x, y, z, mat, size) {
 
 function createMobiusStrip() {
   "use strict"
+  
 
   geometry = new THREE.BufferGeometry();
   
@@ -413,6 +414,8 @@ function createMobiusStrip() {
   iArray.push(count - 1, 2 * count - 1, 0);
   iArray.push(0, count-1, count);
 
+  material.side = THREE.DoubleSide;
+  
   geometry.setIndex(iArray);
   geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
   mobiusStrip = new THREE.Mesh(geometry, material);
@@ -513,8 +516,8 @@ function init() {
 
   clock = new THREE.Clock();
 
-  createCamera(30, 20, 5, new THREE.Vector3(0, 10, 0));
-  createDirectionalLight(10, 20, 0);
+  createCamera(25, 30, 5, new THREE.Vector3(0, 10, 0));
+  createDirectionalLight(20, 30, 5);
   createAmbientLight();
 
   window.addEventListener("resize", onResize, false);
@@ -604,7 +607,11 @@ function toggleRing(ring) {
 }
 
 function setMaterial(newMaterial) {
+
+  newMaterial.side = THREE.DoubleSide;
+
   carousel.traverse(function (node) {
+    
     if (node instanceof THREE.Mesh) {
       node.material = newMaterial;
     }
