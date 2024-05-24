@@ -25,18 +25,25 @@ const parametricFunctions = [
   hyperboloidParametricFunction,
   sphereParametricFunction,
 ];
-const ambientLight = new THREE.AmbientLight(0xffa500, 0.5);
+const ambientLight = new THREE.AmbientLight(0xffa500, 2);
 
-const lambertMaterial = new THREE.MeshLambertMaterial({ color: 0xA32F00 });
+function getRandomRed() {
+  const red = 0xFF0000;
+  const green = Math.floor(Math.random() * 64);
+  const blue = Math.floor(Math.random() * 64);
+  return red | (green << 8) | blue;
+}
+
+const lambertMaterial = new THREE.MeshLambertMaterial({ color: getRandomRed() });
 const phongMaterial = new THREE.MeshPhongMaterial({
-  color: 0x00ff00,
+  color: getRandomRed(),
   shininess: 100,
 });
-const toonMaterial = new THREE.MeshToonMaterial({ color: 0x0000ff });
+const toonMaterial = new THREE.MeshToonMaterial({ color: getRandomRed() });
 const normalMaterial = new THREE.MeshNormalMaterial();
-const basicMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const basicMaterial = new THREE.MeshBasicMaterial({ color: getRandomRed() });
 
-var material = basicMaterial;
+var material = new THREE.MeshBasicMaterial({color: getRandomRed()});
 
 const collumnHeight = 20;
 const ringHeight = 2;
@@ -102,8 +109,8 @@ function createSpotlight(x, y, z) {
   var spotlight = new THREE.SpotLight(0xffffff, 10);
   spotlight.position.set(x, y, z);
   spotlight.target.position.set(x, y + 1, z);
-  scene.add(spotlight);
-  scene.add(spotlight.target);
+  carousel.add(spotlight);
+  carousel.add(spotlight.target);
 
   spotlights.push(spotlight);
 }
@@ -111,7 +118,7 @@ function createSpotlight(x, y, z) {
 function createDirectionalLight(x, y, z) {
   "use strict";
 
-  directionalLight = new THREE.DirectionalLight(0xffffff, 3);
+  directionalLight = new THREE.DirectionalLight(0xffffff, 10);
   directionalLight.position.set(x, y, z);
 
   const target = new THREE.Object3D();
@@ -123,8 +130,11 @@ function createDirectionalLight(x, y, z) {
 }
 
 function createAmbientLight() {
-  scene.add(ambientLight);
   ambientLight.visible = true;
+  ambientLight.position.set(20, 30, 5);
+  ambientLight.lookAt(carousel.position)
+  scene.add(ambientLight);
+
 }
 
 ////////////////////////
@@ -133,9 +143,6 @@ function createAmbientLight() {
 
 function addColumn(obj, x, y, z) {
   "use strict";
-
-  var material = new THREE.MeshBasicMaterial({ color: new THREE.Color(Math.random() * 0xffffff) });
-
 
   geometry = new THREE.CylinderGeometry(1, 1, 20, 32);
   mesh = new THREE.Mesh(geometry, material);
@@ -252,7 +259,7 @@ function addParametricShape(obj, x, y, z, ParametricFunc) {
 
   geometry = new ParametricGeometry(ParametricFunc);
   material = new THREE.MeshPhongMaterial({
-    color: new THREE.Color(Math.random(), Math.random(), Math.random()),
+    color: new THREE.Color(Math.random(), Math.random()* 0.09, Math.random() * 0.1),
     side: THREE.DoubleSide,
     flatShading: true,
   });
@@ -302,8 +309,6 @@ function addRing(obj, x, y, z, innerRadius, outerRadius) {
     depth: 2,
     bevelEnabled: false,
   };
-
-  var material = new THREE.MeshBasicMaterial({ color: new THREE.Color(Math.random() * 0xffffff) });
 
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   mesh = new THREE.Mesh(geometry, material);
@@ -385,7 +390,7 @@ function addSkydome() {
 }
 
 function addFloor(x, y, z) {
-  geometry = new THREE.PlaneGeometry(100, 100); // width, height
+  geometry = new THREE.PlaneGeometry(100, 100);
   material = new THREE.MeshBasicMaterial({
     color: 0x990000,
     side: THREE.DoubleSide,
@@ -436,10 +441,7 @@ function createMobiusStrip() {
   geometry.setIndex(iArray);
   geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
 
-  // Compute the normals for the geometry
   geometry.computeVertexNormals();
-
-  const material = new THREE.MeshStandardMaterial({ color: 0x00ff00, side: THREE.DoubleSide });
 
   mobiusStrip = new THREE.Mesh(geometry, material);
   scene.add(mobiusStrip);
@@ -534,8 +536,15 @@ function init() {
 
   createNormalCamera(25, 30, 5, new THREE.Vector3(0, 10, 0));
   createVRCamera(5, 20, 20);
-  createDirectionalLight(20, 30, 5);
+  createDirectionalLight(25, 30, 5);
   createAmbientLight();
+
+  for(var i = 0; i <  spotlights.length; i++) {
+    console.log("x " + spotlights[i].position.x);
+    console.log("y " + spotlights[i].position.y);
+    console.log("z " + spotlights[i].position.z);
+  }
+
 
   window.addEventListener("resize", onResize, false);
   window.addEventListener("keydown", onKeyDown);
@@ -569,19 +578,17 @@ function onResize() {
 ///////////////////////
 /* KEY DOWN CALLBACK */
 ///////////////////////
+
 function onKeyDown(e) {
   "use strict";
 
   switch (e.key) {
-    // Move Inner Ring
     case "1":
       toggleRing(innerRing);
       break;
-    // Move Middle Ring
     case "2":
       toggleRing(middleRing);
       break;
-    // Move Outer Ring
     case "3":
       toggleRing(outerRing);
       break;
@@ -608,7 +615,7 @@ function onKeyDown(e) {
     case "d":
     case "D":
       directionalLight.visible = !directionalLight.visible;
-      ambientLight.visible = true;
+      
       break;
     case "s":
     case "S":
@@ -629,22 +636,20 @@ function toggleRing(ring) {
   ring.userData.moving = !ring.userData.moving;
 }
 
+function applyMaterial(node, newMaterial) {
+  if (newMaterial === normalMaterial) {
+    node.material = newMaterial;
+  } else if (node instanceof THREE.Mesh) {
+    node.material = newMaterial.clone();
+    node.material.color.set(new THREE.Color(Math.random(), Math.random() * 0.1, Math.random() * 0.1));
+  }
+}
+
 function setMaterial(newMaterial) {
   newMaterial.side = THREE.DoubleSide;
 
-  carousel.traverse(function (node) {
-    if (node instanceof THREE.Mesh) {
-      node.material = newMaterial;
-    }
-  });
-  mobiusStrip.traverse(function (node) {
-    if (node instanceof THREE.Mesh) {
-      if (node.material) {
-        node.material.dispose(); // Dispose of the old material
-      }
-      node.material = newMaterial;
-    }
-  });
+  carousel.traverse((node) => applyMaterial(node, newMaterial));
+  mobiusStrip.traverse((node) => applyMaterial(node, newMaterial));
 }
 
 ///////////////////////
