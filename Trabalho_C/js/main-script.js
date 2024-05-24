@@ -6,7 +6,7 @@ import { ParametricGeometry } from "three/addons/geometries/ParametricGeometry.j
 /* GLOBAL VARIABLES */
 //////////////////////
 
-var camera, scene, renderer, delta, clock, pointLight;
+var camera, scene, renderer, delta, clock, directionalLight;
 var carousel, innerRing, middleRing, outerRing;
 var geometry, mesh;
 
@@ -92,17 +92,23 @@ function createSpotlight(x, y, z) {
   spotlights.push(spotlight);
 }
 
-function createLight(x, y, z) {
+function createDirectionalLight(x, y, z) {
   "use strict";
 
-  pointLight = new THREE.PointLight(0xffffff, 100, 300);
-  pointLight.position.set(x, y, z);
-  scene.add(pointLight);
+  directionalLight = new THREE.DirectionalLight(0xffffff);
+  directionalLight.position.set(x, y, z);
+
+  const target = new THREE.Object3D();
+  target.position.set(0, 0, 0);
+  directionalLight.target = target;
+
+  scene.add(directionalLight);
+  scene.add(target);
 }
 
 function createAmbientLight() {
   scene.add(ambientLight);
-  ambientLight.visible = false;
+  ambientLight.visible = true;
 }
 
 ////////////////////////
@@ -242,7 +248,7 @@ function createRing(obj, x, y, z, innerRadius, outerRadius, startHeight) {
 
   const ring = new THREE.Object3D();
 
-  ring.userData = { moving: true, way: 1 };
+  ring.userData = { moving: false, way: 1 };
 
   ring.position.set(x, startHeight + ringHeight / 2, z);
   addRing(ring, x, y, z, innerRadius, outerRadius);
@@ -443,7 +449,7 @@ function init() {
   clock = new THREE.Clock();
 
   createCamera(30, 20, 5, new THREE.Vector3(0, 10, 0));
-  createLight(10, 20, 0);
+  createDirectionalLight(10, 20, 0);
   createAmbientLight();
 
   window.addEventListener("resize", onResize, false);
@@ -456,8 +462,6 @@ function init() {
 /////////////////////
 function animate() {
   "use strict";
-
-  update();
 
   renderer.setAnimationLoop(function () {
     update();
@@ -518,8 +522,8 @@ function onKeyDown(e) {
       break;
     case "d":
     case "D":
-      pointLight.visible = !pointLight.visible;
-      ambientLight.visible = ambientLight.visible = true;
+      directionalLight.visible = !directionalLight.visible;
+      ambientLight.visible = true;
       break;
     case "s":
     case "S":
