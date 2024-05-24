@@ -6,7 +6,7 @@ import { ParametricGeometry } from "three/addons/geometries/ParametricGeometry.j
 /* GLOBAL VARIABLES */
 //////////////////////
 
-var camera, scene, renderer, delta, clock, directionalLight;
+var normalCamera, VRCamera, scene, renderer, delta, clock, directionalLight;
 var carousel, innerRing, middleRing, outerRing, mobiusStrip;
 var geometry, mesh;
 
@@ -61,20 +61,33 @@ function createScene() {
 /* CREATE CAMERA(S) */
 //////////////////////
 
-function createCamera(x, y, z, lookPosition) {
+function createNormalCamera(x, y, z, lookPosition) {
   "use strict";
 
-  camera = new THREE.PerspectiveCamera(
+  normalCamera = new THREE.PerspectiveCamera(
     70,
     window.innerWidth / window.innerHeight,
     1,
     1000,
   );
-  camera.position.x = x;
-  camera.position.y = y;
-  camera.position.z = z;
+  normalCamera.position.x = x;
+  normalCamera.position.y = y;
+  normalCamera.position.z = z;
 
-  camera.lookAt(lookPosition);
+  normalCamera.lookAt(lookPosition);
+}
+
+function createVRCamera(x, y, z) {
+  VRCamera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000,
+  );
+  const VRCameraGroup = new THREE.Group();
+  VRCameraGroup.add(VRCamera);
+  scene.add(VRCameraGroup);
+  VRCameraGroup.position.set(x, y, z);
 }
 
 /////////////////////
@@ -96,7 +109,7 @@ function createSpotlight(x, y, z) {
 function createDirectionalLight(x, y, z) {
   "use strict";
 
-  directionalLight = new THREE.DirectionalLight(0xffffff,3);
+  directionalLight = new THREE.DirectionalLight(0xffffff, 3);
   directionalLight.position.set(x, y, z);
 
   const target = new THREE.Object3D();
@@ -376,7 +389,7 @@ function addFloor(x, y, z) {
   scene.add(mesh);
 }
 function createPoint(x, y, z, mat, size) {
-  "use strict"
+  "use strict";
   geometry = new THREE.SphereGeometry(size);
   mesh = new THREE.Mesh(geometry, mat);
   mesh.position.set(x, y, z);
@@ -384,11 +397,10 @@ function createPoint(x, y, z, mat, size) {
 }
 
 function createMobiusStrip() {
-  "use strict"
-  
+  "use strict";
 
   geometry = new THREE.BufferGeometry();
-  
+
   const count = 128;
   const c = new THREE.Vector3(0, collumnHeight + 3, 0);
   const r = 3;
@@ -396,11 +408,11 @@ function createMobiusStrip() {
   let vArray = [];
   let iArray = [];
 
-  for (let i = 0; i < 2*count; i++) {
-    const a = Math.PI/count*2*i;
-    const x = c.x + r * size.x * (1 + 0.5 * Math.cos(a/2)) * Math.cos(a); // x
-    const y = c.y - r * size.y * 0.5 * Math.sin(a/2); // y
-    const z = c.z + r * size.z * (1 + 0.5 * Math.cos(a/2)) * Math.sin(a); // z
+  for (let i = 0; i < 2 * count; i++) {
+    const a = (Math.PI / count) * 2 * i;
+    const x = c.x + r * size.x * (1 + 0.5 * Math.cos(a / 2)) * Math.cos(a); // x
+    const y = c.y - r * size.y * 0.5 * Math.sin(a / 2); // y
+    const z = c.z + r * size.z * (1 + 0.5 * Math.cos(a / 2)) * Math.sin(a); // z
     vArray.push(x); // x
     vArray.push(y); // y
     vArray.push(z); // z
@@ -408,35 +420,20 @@ function createMobiusStrip() {
   const vertices = new Float32Array(vArray);
 
   for (let i = 0; i < count - 1; i++) {
-    iArray.push(i, count + i, count + i + 1)
+    iArray.push(i, count + i, count + i + 1);
     iArray.push(count + i + 1, i, i + 1);
   }
   iArray.push(count - 1, 2 * count - 1, 0);
-  iArray.push(0, count-1, count);
+  iArray.push(0, count - 1, count);
 
   material.side = THREE.DoubleSide;
-  
+
   geometry.setIndex(iArray);
-  geometry.setAttribute( 'position', new THREE.BufferAttribute( vertices, 3 ) );
+  geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
   mobiusStrip = new THREE.Mesh(geometry, material);
   scene.add(mobiusStrip);
 }
 
-//////////////////////
-/* CHECK COLLISIONS */
-//////////////////////
-
-function checkCollisions() {
-  "use strict";
-}
-
-///////////////////////
-/* HANDLE COLLISIONS */
-///////////////////////
-
-function handleCollisions() {
-  "use strict";
-}
 ////////////
 /* UPDATE */
 ////////////
@@ -491,8 +488,15 @@ function tryMovingRing(ring) {
 
 function render() {
   "use strict";
+  var currentCamera = normalCamera;
 
-  renderer.render(scene, camera);
+  if (renderer.xr.isPresenting) {
+    currentCamera = VRCamera;
+  } else {
+    currentCamera = normalCamera;
+  }
+
+  renderer.render(scene, currentCamera);
 }
 
 ////////////////////////////////
@@ -516,7 +520,8 @@ function init() {
 
   clock = new THREE.Clock();
 
-  createCamera(25, 30, 5, new THREE.Vector3(0, 10, 0));
+  createNormalCamera(25, 30, 5, new THREE.Vector3(0, 10, 0));
+  createVRCamera(5, 20, 20);
   createDirectionalLight(20, 30, 5);
   createAmbientLight();
 
@@ -544,8 +549,8 @@ function animate() {
 function onResize() {
   "use strict";
 
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+  normalCamera.aspect = window.innerWidth / window.innerHeight;
+  normalCamera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
@@ -607,11 +612,9 @@ function toggleRing(ring) {
 }
 
 function setMaterial(newMaterial) {
-
   newMaterial.side = THREE.DoubleSide;
 
   carousel.traverse(function (node) {
-    
     if (node instanceof THREE.Mesh) {
       node.material = newMaterial;
     }
