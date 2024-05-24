@@ -228,6 +228,8 @@ function sphereParametricFunction(u, v, target) {
 function addParametricShape(obj, x, y, z, ParametricFunc) {
   "use strict";
 
+  const randomScalar = 0.6 + Math.random() * 0.4;
+
   geometry = new ParametricGeometry(ParametricFunc);
   material = new THREE.MeshPhongMaterial({
     color: new THREE.Color(Math.random(), Math.random(), Math.random()),
@@ -236,11 +238,15 @@ function addParametricShape(obj, x, y, z, ParametricFunc) {
   });
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
+  mesh.scale.x *= randomScalar;
+  mesh.scale.y *= randomScalar;
+  mesh.scale.z *= randomScalar;
+  mesh.rotateX(Math.random() * 100);
+  mesh.rotateY(Math.random() * 100);
+  mesh.rotateZ(Math.random() * 100);
   parametricShapes.push(mesh);
 
   obj.add(mesh);
-
-  return mesh;
 }
 
 function createRing(obj, x, y, z, innerRadius, outerRadius, startHeight) {
@@ -248,7 +254,7 @@ function createRing(obj, x, y, z, innerRadius, outerRadius, startHeight) {
 
   const ring = new THREE.Object3D();
 
-  ring.userData = { moving: false, way: 1 };
+  ring.userData = { moving: true, way: 1 };
 
   ring.position.set(x, startHeight + ringHeight / 2, z);
   addRing(ring, x, y, z, innerRadius, outerRadius);
