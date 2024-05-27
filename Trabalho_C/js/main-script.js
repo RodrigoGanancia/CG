@@ -104,14 +104,14 @@ function createVRCamera(x, y, z) {
 /* CREATE LIGHT(S) */
 /////////////////////
 
-function createSpotlight(x, y, z) {
+function createSpotlight(obj, x, y, z) {
   "use strict ";
 
   var spotlight = new THREE.SpotLight(0xffffff, 10);
   spotlight.position.set(x, y, z);
   spotlight.target.position.set(x, y + 1, z);
-  carousel.add(spotlight);
-  carousel.add(spotlight.target);
+  obj.add(spotlight);
+  obj.add(spotlight.target);
 
   spotlights.push(spotlight);
 }
@@ -316,10 +316,6 @@ function addRing(obj, x, y, z, innerRadius, outerRadius) {
   };
 
 
-  var material = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(Math.random() * 0xffffff),
-  });
-
   const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(x, y, z);
@@ -340,7 +336,7 @@ function createParametricShapes(x, y, z) {
         Math.floor(Math.random() * parametricFunctions.length)
       ],
     );
-    createSpotlight(x, y, z);
+    createSpotlight(innerRing, x, y, z);
 
     var x = Math.cos((Math.PI / 4) * i) * 6.5;
     var z = Math.sin((Math.PI / 4) * i) * 6.5;
@@ -353,7 +349,7 @@ function createParametricShapes(x, y, z) {
         Math.floor(Math.random() * parametricFunctions.length)
       ],
     );
-    createSpotlight(x, y, z);
+    createSpotlight(middleRing, x, y, z);
 
     var x = Math.cos((Math.PI / 4) * i) * 9.5;
     var z = Math.sin((Math.PI / 4) * i) * 9.5;
@@ -366,7 +362,7 @@ function createParametricShapes(x, y, z) {
         Math.floor(Math.random() * parametricFunctions.length)
       ],
     );
-    createSpotlight(x, y, z);
+    createSpotlight(outerRing, x, y, z);
   }
 }
 
@@ -453,11 +449,6 @@ function createMobiusStrip() {
 
   geometry.computeVertexNormals();
 
-
-  const material = new THREE.MeshStandardMaterial({
-    color: 0x00ff00,
-    side: THREE.DoubleSide,
-  });
 
   mobiusStrip = new THREE.Mesh(geometry, material);
   scene.add(mobiusStrip);
@@ -553,12 +544,6 @@ function init() {
   createVRCamera(5, 20, 20);
   createDirectionalLight(25, 30, 5);
   createAmbientLight();
-
-  for(var i = 0; i <  spotlights.length; i++) {
-    console.log("x " + spotlights[i].position.x);
-    console.log("y " + spotlights[i].position.y);
-    console.log("z " + spotlights[i].position.z);
-  }
 
 
   window.addEventListener("resize", onResize, false);
